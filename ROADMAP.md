@@ -48,8 +48,11 @@ The pitch is *scan → rich filters → images of dishes*. MVP must deliver all 
       dish name (+ cuisine), generate-once → review → cache on CDN, populate
       `Dish.imageURL`, fall back to the existing placeholder. **(L)**
   - Decision made — see [docs/research/dish-images.md](docs/research/dish-images.md):
-    use Gemini Flash Image ("Nano Banana") or FLUX.2 [pro] (~$0.03/img); generic
-    "AI · illustrative" framing + label; avoid web image search (copyright/ToS).
+    fallback chain **Spoonacular → Pexels → Pixabay → AI-gen (labeled) → placeholder**,
+    cached by `dishName+cuisine`. Real photos first (Spoonacular's ToS uniquely allows
+    storing the image URL); AI generation (Gemini/FLUX.2) only for the long tail, labeled
+    "AI · illustrative". Avoid web image search + Places/Yelp (ToS forbid caching).
+  - Adds a `Dish.isAIGenerated` field (schema change) to drive the label.
 - [ ] **OCR robustness** — multi-photo / long menus, low-light, angled shots; show a
       "retake" path when confidence is low **(M)**
 - [ ] **Loading & error states** — network failure, empty menu, timeout, offline copy **(S)**

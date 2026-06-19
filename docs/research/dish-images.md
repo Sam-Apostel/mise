@@ -7,117 +7,140 @@ The pitch promises "images of the dishes." This doc decides **how** to source th
 
 ## TL;DR
 
-**Generate dish images with an AI text-to-image model, server-side, from the dish
-name + cuisine — then review/cache once and serve from our own CDN.** Frame them as
-generic *illustrations* (not "the exact plate this restaurant serves") with a visible
-"AI · illustrative" label. This is the cheapest, highest-coverage, and most
-legally-defensible path.
+There is **no single source that is both legally clean and highly dish-relevant** — the
+sources with the best dish photos (Google Images, Places/Yelp) forbid caching/redisplay;
+the ones that allow caching have weaker per-dish relevance. So use a **server-side
+fallback chain**, resolve once per `dishName+cuisine`, cache the result, and never block
+menu parsing on it:
 
-- **Primary provider:** Google **Gemini Flash Image** ("Nano Banana", `gemini-2.5-flash-image`,
-  ~$0.039/image) — strong on food, commercial rights included, and its built-in
-  **SynthID watermark doubles as the EU AI Act provenance mark**. Close alternative:
-  **FLUX.2 [pro]** via **Black Forest Labs** or **Fal.ai** (~$0.03/image, best-in-class
-  food realism).
-- **Avoid:** web image-search APIs (copyright + ToS forbid caching/redisplay), FLUX
-  **[dev]** variants (non-commercial), **Stability** above $1M revenue (enterprise
-  license required), and the sunset models `gpt-image-1` (EOL Oct 2026) / Google
-  **Imagen** (EOL Aug 2026).
+1. **Spoonacular** (search by dish name) — real food photos; **its terms explicitly allow
+   storing the image URL indefinitely**, which is exactly what `Dish.imageURL` needs.
+   _Primary._ ($29/mo "Cook" tier; free tier is dev-only.)
+2. **Pexels** (keyword search) — real food photos, commercial use + self-hosting allowed,
+   no mandatory attribution. _Generic but real, free._
+3. **Pixabay** (keyword search) — broad filler; **must download to our server** and cache
+   responses 24h. _Free._
+4. **AI generation** (Gemini Flash Image / FLUX.2 pro, ~$0.03/img) — for long-tail dishes
+   the above miss. **Must be labeled "AI · illustrative."** _Last resort before placeholder._
+5. **Bundled per-cuisine placeholder** — always set *something*; never a broken image.
+
+Cache by **normalized `dishName + cuisine`** (not per-restaurant) so the same "Pad Thai"
+resolves once across every menu — this is the main cost lever.
+
+**Hard avoids:** web image-search APIs (SerpApi, Brave standard, Google CSE) and
+Places/Yelp/Foursquare — their ToS forbid persistent caching/redisplay, and Google is
+**actively suing SerpApi** (Dec 2025) over exactly this. Bing Image Search is **retired**
+(HTTP 410, Aug 2025). Google CSE is **closing** (ends Jan 2027).
 
 ## Options evaluated
 
-| Approach | Coverage of arbitrary dishes | Cost | Legal/ToS | Verdict |
-|---|---|---|---|---|
-| **Web image search** (Google CSE, SerpAPI, Brave; Bing retired) | High | Low–med (per query) | ❌ Results are third-party copyrighted; most APIs' ToS **forbid caching/redisplaying** images. Provenance unknowable. | **Reject** — infringement risk |
-| **Stock photo APIs** (Unsplash, Pexels, Pixabay) | Low (generic, not the dish) | Free–low | ✅ Permissive, attribution varies | Weak — rarely matches the actual dish |
-| **Recipe/meal DBs** (TheMealDB, Spoonacular, Edamam) | Low–med (common dishes only) | Free–med | ✅ usually licensed for app use (verify) | Useful **supplement** for popular dishes; poor long-tail coverage |
-| **Place/review photos** (Google Places, Yelp, Foursquare) | Med (restaurant-specific) | Med, strict ToS | ⚠️ Display rules + attribution; tied to a matched venue | Future enhancement once we resolve the restaurant |
-| **AI generation** (FLUX, Gemini, OpenAI) | **High (any dish)** | ~$0.03–0.07/image once, then $0 from CDN | ✅ You own/commercially use output (per-provider, see below) | ✅ **Chosen** |
+| Source | Live 2026? | Cost | Cache + redisplay allowed? | Dish relevance | Verdict |
+|---|---|---|---|---|---|
+| **Spoonacular** | ✅ | free dev / $29+/mo | ✅ **store image URL indefinitely** | Good (named dishes) | ✅ **Primary** |
+| **Pexels** | ✅ | free | ✅ store + self-host | Generic food | ✅ Fallback 2 |
+| **Pixabay** | ✅ | free | ✅ but **must self-host** + 24h response cache | Generic, broad | ✅ Fallback 3 |
+| **AI generation** (Gemini/FLUX) | ✅ | ~$0.03–0.07/img once | ✅ you own output → cache to our CDN | Any dish (synthetic) | ✅ Labeled fallback 4 |
+| TheMealDB | ✅ | £10 lifetime | image license undocumented ⚠️ | Weak (~300) | Maybe; get license in writing |
+| Edamam | ✅ | $9+/mo, no free | per-user-password cache only; forced branding | Best breadth | ❌ poor terms |
+| Unsplash | ✅ | free | ❌ hotlink-only, fire download events, no self-host | Generic | ❌ not a self-host source |
+| SerpApi (Google Images) | ✅ but **Google suing** | ~$75/mo | ❌ no redisplay; 3rd-party copyright | Excellent | ❌ legal risk |
+| Brave Image Search | ✅ | $5/1k | ❌ caching barred on standard plan | Good | ❌ |
+| Google CSE (image) | **closing 2027** | $5/1k | ❌ transient only | Excellent | ❌ |
+| Bing Image Search | **retired (410)** | — | — | — | ❌ dead |
+| Google Places / Yelp / Foursquare | ✅ | $7–19/1k | ❌ **no caching** (Places), ≤24h (Yelp) | Place photos, not dish-matched | ❌ for MVP |
 
-### Why AI generation wins for MVP
-Coverage is the deciding factor: a scanned menu has arbitrary, long-tail dishes that
-stock/recipe/search sources won't reliably have. Generation always produces *something*
-relevant, at a uniform style, for a few cents amortized to ~$0 via caching.
-
-## AI-generation provider comparison (~1024², verified 2026-06)
+## AI-generation provider comparison (for fallback tier 4; ~1024², verified 2026-06)
 
 | Provider | Recommended model | $/image | Food realism | Commercial | Caveat |
 |---|---|---|---|---|---|
-| **Google Gemini** | `gemini-2.5-flash-image` (Nano Banana) | **$0.039** ($0.0195 batch) | Excellent (often singled out for food) | You own output | **SynthID watermark on every image** (a *plus* for disclosure); **Imagen is EOL Aug 17 2026 — don't use it** |
+| **Google Gemini** | `gemini-2.5-flash-image` (Nano Banana) | **$0.039** ($0.0195 batch) | Excellent (often singled out for food) | You own output | **SynthID watermark** (a *plus* for disclosure); **Imagen EOL Aug 17 2026 — don't use** |
 | **Black Forest Labs** | FLUX.2 [pro] | **$0.03** | **Best-in-class** | Commercial included (hosted API) | Open-weights license only matters if self-hosting |
 | **Fal.ai** | FLUX.2 [pro] | $0.03/MP | FLUX-tier | Commercial included for pro | Avoid [dev]; low latency |
 | **Replicate** | FLUX 1.1 pro / FLUX.2 | $0.04 ($0.025 dev) | FLUX-tier | License **follows the model** | Avoid FLUX **[dev]** (non-commercial) |
-| **OpenAI** | GPT Image 1.5 / 2 | $0.05–0.21 high; ~$0.005–0.02 low | Excellent | You own output | `gpt-image-1` **EOL Oct 23 2026** — target successors |
+| **OpenAI** | GPT Image 1.5 / 2 | $0.05–0.21 high | Excellent | You own output | `gpt-image-1` **EOL Oct 23 2026** |
 | **Stability** | Stable Image Ultra/Core | $0.08 / $0.03 | Good (trails FLUX) | You own output | **Enterprise license required >$1M revenue** |
 
-**Pick:** Gemini Flash Image (SynthID = free provenance for EU compliance) or FLUX.2 pro
-(top realism). Both ~$0.03–0.04, both clean commercial terms. A few-thousand-dish
-catalog ≈ **$100–500 one-time**.
+If we generate: pick **Gemini Flash Image** (SynthID = free EU provenance mark) or
+**FLUX.2 pro** (top realism). A few-thousand-dish AI tier ≈ **$100–500 one-time**, then
+$0 from CDN.
 
-## Legal & compliance (the part that actually constrains the design)
+## Licensing gotchas (the rules that shaped the chain)
 
-The litigation risk is **not** "using AI" — it's an image reading as *the specific dish
-this restaurant serves* with details that turn out wrong (the Burger King "Whopper" /
-Taco Bell false-advertising theory; survived a motion to dismiss May 2025; untested for
-AI but directly analogous). AI models hallucinate plausible-but-wrong ingredients/portions,
-which is exactly the actionable "specific factual claim" category. **Allergen/ingredient
-mismatches are the worst case.**
+- **Search-API results are leads, not assets.** SerpApi & standard Brave bar storing/
+  redisplaying; underlying images are third-party copyrighted regardless. Google's Dec 2025
+  suit against SerpApi is precisely about redistributing those images.
+- **Google Places photos can't be cached at all** (resource names expire; must re-fetch live).
+  **Yelp = 24h max** and bars AI-training use. **Foursquare** bars persistent datasets.
+- **Unsplash** = hotlink + fire `download_location` event + photographer credit; no self-host.
+- **Pixabay** flips it: you *must* download to your server and cache responses 24h.
+- **Spoonacular**: store the image **URL** (and id/title) only — confirm whether re-hosting
+  the image *binary* is allowed before proxying; delete stored data if you stop paying.
+- **TheMealDB**: no published image license — get written confirmation + the £10 commercial
+  key before scaling; don't ship on test key `1`.
 
-Design rules that follow:
-1. **Label every AI image visibly and persistently** — e.g. "AI-generated · illustrative"
-   plus "serving suggestion — actual dish may vary." Visible label > metadata (the FTC and
-   EU judge the *net impression*, and metadata gets stripped in transit).
-2. **Frame as a generic illustration**, not the vendor's actual plate. Copy: "Example of
-   [dish type]," never "Here's what you'll get."
-3. **Don't let the image imply portion size, exact ingredients, sides, or anything
-   allergen-relevant.** Keep prompts stylized/representative.
-4. **Embed C2PA Content Credentials** (and rely on Gemini's SynthID) as the machine-readable
-   mark — helps with **EU AI Act Art. 50**, which applies **2 Aug 2026** for AI-content
-   disclosure if we have EU users. Pair with the visible label, don't rely on it alone.
-5. **Generate server-side from non-personal inputs** (dish names) so we don't trigger
-   **Apple App Store Guideline 5.1.2(i)** (consent for sharing user data with third-party AI).
+## AI fake-food: the false-advertising constraint (applies to tier 4)
+
+The litigation risk is **not** "using AI" — it's an image reading as *the specific dish this
+restaurant serves* with details that turn out wrong (the Burger King "Whopper" / Taco Bell
+false-advertising theory; survived a motion to dismiss May 2025; untested for AI but directly
+analogous). AI models hallucinate plausible-but-wrong ingredients/portions — the actionable
+"specific factual claim" category. **Allergen/ingredient mismatch is the worst case.** So:
+
+1. **Label every AI image visibly and persistently** ("AI-generated · illustrative",
+   "serving suggestion — actual dish may vary"). Visible label > metadata (FTC/EU judge the
+   net impression; metadata gets stripped).
+2. **Frame as a generic illustration**, never "here's what you'll get."
+3. **Don't imply portion/exact ingredients/allergen content** in the prompt.
+4. **Keep C2PA / SynthID provenance** marks — supports **EU AI Act Art. 50** (AI-content
+   disclosure, applies **2 Aug 2026** for EU users).
+5. **Generate server-side from dish names** (non-personal input) to avoid **Apple App Store
+   Guideline 5.1.2(i)** (consent for sharing user data with third-party AI).
 6. **Honor takedown/correction** so a restaurant can flag a wrong image.
 
-(US copyrightability note: purely AI-generated images aren't copyright-registrable in the
-US — we can use/sell them but can't claim exclusive copyright. Fine for this use.)
+(Purely AI-generated images aren't US-copyright-registrable — usable/sellable, not exclusive.)
 
 ## Recommended architecture (Vapor)
 
-A server-side enrichment step, decoupled from the parse response so it never blocks OCR→menu:
+Enrichment is a one-time, cached, best-effort step, **decoupled from `/menu/parse`** so it
+never adds OCR→menu latency.
 
-```
-parse menu ──> for each dish: imageKey = sha256(normalize(name) | cuisine | styleVersion)
-                              │
-                   ┌──────────┴───────────┐
-              cache HIT                cache MISS
-                   │                        │
-          return CDN URL          enqueue generation job
-                                  (Gemini/FLUX) ──> moderate/accept
-                                  ──> store on object storage/CDN
-                                  ──> next load picks it up
+```swift
+func enrichImage(for dish: Dish, on req: Request) async -> ImageResult {
+    let key = dish.cacheKey                       // sha256(normalize(name) | cuisine)
+    if let hit = try? await ImageCache.find(key, on: req.db) { return hit }
+
+    // First hit wins; each provider call has a 2–3s timeout and returns nil on failure.
+    let result = await spoonacular(dish, req)     // real photo; store URL (ToS-OK)
+        ?? await pexels(dish, req)                // real, self-host OK
+        ?? await pixabay(dish, req)               // real; MUST self-host bytes
+        ?? await generate(dish, req)              // AI; cache to our CDN, isAIGenerated = true
+        ?? placeholder(for: dish.cuisine)         // never nil
+    try? await ImageCache(key: key, result: result).save(on: req.db)
+    return result
+}
 ```
 
-- **Lazy + cached:** `/menu/parse` returns dishes with `imageURL` set only for cache hits;
-  the app shows the existing placeholder otherwise. A lightweight `GET /v1/dish/image?key=…`
-  (or a background worker) generates-and-caches on demand; `AsyncImage` fills it in on the
-  next render. Keeps parse latency low and cost bounded.
-- **Cache key** = `sha256(normalizedName | cuisine | styleVersion)` so identical dishes
-  across menus reuse one image, and bumping `styleVersion` lets us bulk-regenerate.
-- **Storage:** Railway volume or an S3/R2 bucket fronted by a CDN; serve immutable URLs.
-- **Prompt template** (stylized, generic): _"A single appetizing studio photo of {dish},
-  {cuisine} cuisine, on a plain neutral background, soft natural light, no text — a generic
-  illustration, not a specific restaurant's plating."_
-- **Degrade gracefully:** generation failure/timeout → keep the SF Symbol placeholder
+- **Cache by `normalize(name) + cuisine`**, persisted in our DB (optionally Redis-fronted),
+  so identical dishes resolve once across all menus.
+- **Lazy:** `/menu/parse` returns dishes with `imageURL` only for cache hits; a light
+  `GET /v1/dish/image?key=…` (or a background worker) resolves misses; `AsyncImage` fills
+  in on next render. Keeps parse fast and cost bounded.
+- **Concurrency-limit** enrichment (N dishes at a time) to respect rate limits / Spoonacular
+  points; dedupe within a menu.
+- **Add `Dish.isAIGenerated`** so the iOS client renders the "AI · illustrative" label only
+  on tier-4 images. (Schema change when we build this.)
+- **Degrade gracefully:** the chain always terminates at the bundled per-cuisine placeholder
   (already implemented in `DishThumbnail`).
-- **Cost control:** cache aggressively, cap generations per request, prefer the cheap tier.
 
 ## Before-launch checklist
-- [ ] Confirm provider terms in-browser (some policy pages 403'd to automated fetchers).
-- [ ] Decide Gemini (SynthID/cheap/compliance) vs FLUX.2 pro (max realism).
-- [ ] Add the visible "AI · illustrative" label + C2PA marks.
-- [ ] Verify EU AI Act Art. 50 applicability for our user base.
-- [ ] Legal review of labeling + a takedown path.
+- [ ] Spoonacular: confirm re-hosting the image *binary* vs. URL-only; subscribe to a paid tier.
+- [ ] Add `Dish.isAIGenerated` + the visible label in the app.
+- [ ] If generating: choose Gemini (SynthID/cheap/compliance) vs FLUX.2 pro (max realism); add C2PA marks.
+- [ ] Verify EU AI Act Art. 50 applicability for our user base; legal review of labeling + takedown path.
+- [ ] Re-confirm provider prices/terms in-browser (several policy pages 403'd automated fetchers).
 
-_Sources captured during research: BFL/Fal/Replicate/Stability pricing & terms pages,
-ai.google.dev pricing & Imagen-deprecation docs, OpenAI service terms, FTC deception
-policy, Harvard Law analysis of the Whopper case, EU AI Act Art. 50 / Code of Practice,
-Apple App Review Guidelines 5.1.2(i)._
+_Sources: Spoonacular/Pexels/Pixabay/Unsplash/Edamam/TheMealDB API terms & pricing; Google
+Places, Yelp, Foursquare terms; Brave & Google CSE docs; Bing retirement notice; Google v.
+SerpApi (Dec 2025); ai.google.dev pricing & Imagen-deprecation; BFL/Fal/Replicate/Stability
+pricing & terms; OpenAI service terms; FTC deception policy; Harvard Law Whopper analysis;
+EU AI Act Art. 50 / Code of Practice; Apple App Review Guideline 5.1.2(i)._
