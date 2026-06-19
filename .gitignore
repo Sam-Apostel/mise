@@ -1,0 +1,24 @@
+# ==== Swift Package Manager ====
+.build/
+.swiftpm/
+Package.resolved
+
+# ==== Xcode ====
+# The project is generated from app/project.yml by XcodeGen — don't commit it.
+*.xcodeproj/
+*.xcworkspace/
+xcuserdata/
+DerivedData/
+build/
+*.xcuserstate
+*.moved-aside
+
+# ==== macOS ====
+.DS_Store
+
+# ==== Secrets / local env ====
+.env
+*.local
+
+# ==== Railway ====
+.railway/

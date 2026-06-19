@@ -1,0 +1,69 @@
+name: Mise
+options:
+  bundleIdPrefix: be.apostel.mise
+  deploymentTarget:
+    iOS: "18.0"
+  createIntermediateGroups: true
+  groupSortPosition: top
+
+settings:
+  base:
+    SWIFT_VERSION: "6.0"
+    MARKETING_VERSION: "0.1.0"
+    CURRENT_PROJECT_VERSION: "1"
+    # Set your Apple Developer team here (or via an .xcconfig) before running on device.
+    DEVELOPMENT_TEAM: ""
+    SWIFT_STRICT_CONCURRENCY: complete
+
+packages:
+  MiseShared:
+    path: ../Shared
+
+targets:
+  Mise:
+    type: application
+    platform: iOS
+    sources:
+      - path: Sources
+      - path: Resources
+    dependencies:
+      - package: MiseShared
+        product: MiseShared
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: be.apostel.mise
+        GENERATE_INFOPLIST_FILE: YES
+        TARGETED_DEVICE_FAMILY: "1,2"
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+        INFOPLIST_KEY_UILaunchScreen_Generation: YES
+        INFOPLIST_KEY_UIApplicationSceneManifest_Generation: YES
+        INFOPLIST_KEY_UISupportedInterfaceOrientations: "UIInterfaceOrientationPortrait"
+        INFOPLIST_KEY_NSCameraUsageDescription: "Mise uses the camera to scan menus."
+        INFOPLIST_KEY_NSPhotoLibraryUsageDescription: "Mise reads menu photos you choose from your library."
+        # Backend base URL — point at your Railway deployment for device builds.
+        INFOPLIST_KEY_MiseAPIBaseURL: "http://localhost:8080"
+
+  MiseTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - path: Tests
+    dependencies:
+      - target: Mise
+      - package: MiseShared
+        product: MiseShared
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+
+schemes:
+  Mise:
+    build:
+      targets:
+        Mise: all
+    run:
+      config: Debug
+    test:
+      targets:
+        - MiseTests
