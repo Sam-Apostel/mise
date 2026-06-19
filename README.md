@@ -114,7 +114,9 @@ serif dish names) live in `app/Sources/App/DesignSystem.swift`.
 
 ## Roadmap
 
+See [ROADMAP.md](ROADMAP.md) for the full plan (now → TestFlight MVP → 1.0). Nearest up next:
+
+- [ ] Deploy backend to Railway and point the app at it
 - [ ] Dish image enrichment (populate `Dish.imageURL` server-side)
-- [ ] Persist scanned menus / history
 - [ ] Live camera capture (currently photo-library picker)
-- [ ] Real translation quality pass for bilingual descriptions
+- [ ] App icon + signing + first TestFlight build
