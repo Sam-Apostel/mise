@@ -1,0 +1,29 @@
+name: Deploy server (Railway)
+
+# Manual trigger only — tap "Run workflow" (GitHub mobile app or web) to deploy.
+# Deliberately not on push, so you control when production deploys.
+on:
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: "Optional note for this deploy"
+        required: false
+
+concurrency:
+  group: railway-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Railway CLI
+        run: npm install -g @railway/cli
+
+      - name: Deploy to Railway
+        env:
+          # Project token from Railway → project "mise" → Settings → Tokens.
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+        run: railway up --ci

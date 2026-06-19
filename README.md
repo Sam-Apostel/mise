@@ -88,9 +88,12 @@ cd Shared && swift test
 
 ## Deploying the backend to Railway
 
+**Phone-friendly, one-tap deploy: see [DEPLOY.md](DEPLOY.md).** The project is already
+created; a GitHub Actions workflow deploys on a button press.
+
 The Dockerfile lives in `server/` but copies the sibling `Shared/` package, so the
 **build context must be the repo root** — which is exactly what `railway.json`
-(at the root) configures.
+(at the root) configures. Local CLI alternative:
 
 ```sh
 railway login
