@@ -44,11 +44,12 @@ The pitch is *scan → rich filters → images of dishes*. MVP must deliver all 
 
 - [ ] **Live camera capture** — `VNDocumentCameraViewController` (or AVFoundation) in
       addition to the photo picker; auto-crop the menu **(M)**
-- [ ] **Dish images (v1)** — server-side enrichment step: image search keyed by
-      dish name (+ cuisine/restaurant), cache results, populate `Dish.imageURL`.
-      Falls back to the existing placeholder. **(L)**
-  - Decide source: web image search API (SerpAPI/Bing/Google CSE) vs. licensed food
-    image set vs. generated. Document licensing.
+- [ ] **Dish images (v1)** — server-side enrichment: **AI-generated** images keyed by
+      dish name (+ cuisine), generate-once → review → cache on CDN, populate
+      `Dish.imageURL`, fall back to the existing placeholder. **(L)**
+  - Decision made — see [docs/research/dish-images.md](docs/research/dish-images.md):
+    use Gemini Flash Image ("Nano Banana") or FLUX.2 [pro] (~$0.03/img); generic
+    "AI · illustrative" framing + label; avoid web image search (copyright/ToS).
 - [ ] **OCR robustness** — multi-photo / long menus, low-light, angled shots; show a
       "retake" path when confidence is low **(M)**
 - [ ] **Loading & error states** — network failure, empty menu, timeout, offline copy **(S)**
