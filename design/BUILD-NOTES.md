@@ -1,6 +1,6 @@
 # The board in SwiftUI: build notes (17 Oct 2026)
 
-Simulator shots of the build are in [shots/build](shots/build/sheet.png), taken on an iPhone 18 Pro simulator (iOS 27.0, 402×874) from the seeds:
+Simulator shots of the build are in [shots/app-r1](shots/app-r1/sheet.png), taken on an iPhone 18 Pro simulator (iOS 27.0, 402×874) from the seeds:
 
 | Shot | Launch arguments |
 |---|---|
