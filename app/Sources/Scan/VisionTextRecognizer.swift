@@ -22,10 +22,14 @@ struct VisionTextRecognizer {
         guard let ciImage = CIImage(data: imageData) else {
             throw RecognitionError.invalidImage
         }
-        return try await recognizeText(in: ciImage)
+        // Camera photos store pixels sensor-side up and carry the real
+        // orientation in EXIF; Vision needs it or portrait menus read sideways.
+        let orientation = (ciImage.properties[kCGImagePropertyOrientation as String] as? UInt32)
+            .flatMap(CGImagePropertyOrientation.init(rawValue:)) ?? .up
+        return try await recognizeText(in: ciImage, orientation: orientation)
     }
 
-    func recognizeText(in image: CIImage) async throws -> String {
+    func recognizeText(in image: CIImage, orientation: CGImagePropertyOrientation = .up) async throws -> String {
         try await withCheckedThrowingContinuation { continuation in
             let request = VNRecognizeTextRequest { request, error in
                 if let error {
@@ -43,8 +47,12 @@ struct VisionTextRecognizer {
             }
             request.recognitionLevel = .accurate
             request.usesLanguageCorrection = true
+            // Vision defaults to English, so correction pushes Italian words
+            // toward English. Prefer Italian and let Vision detect the rest.
+            request.recognitionLanguages = ["it-IT", "en-US", "fr-FR", "es-ES", "de-DE"]
+            request.automaticallyDetectsLanguage = true
 
-            let handler = VNImageRequestHandler(ciImage: image, options: [:])
+            let handler = VNImageRequestHandler(ciImage: image, orientation: orientation, options: [:])
             do {
                 try handler.perform([request])
             } catch {
