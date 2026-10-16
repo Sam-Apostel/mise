@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Mise — exploration: three concepts</title>
+<link rel="stylesheet" href="file:///Users/sam/.claude/skills/app-designer/assets/device.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300..800&display=swap" rel="stylesheet">
+<style>
+.screen { font-family: var(--sf); }
+.tb { position:absolute; top:var(--safe-top); left:16px; right:16px; height:44px; display:flex; justify-content:space-between; align-items:center; z-index:20; }
+.circ { width:44px; height:44px; border-radius:22px; display:grid; place-items:center; }
+.cap { height:44px; border-radius:22px; padding:0 16px 0 14px; display:flex; align-items:center; gap:8px; font:600 15px/1 var(--sf); letter-spacing:-.2px; }
+svg.ic { width:22px; height:22px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; display:block; }
+
+/* ============ A. Chalkboard ============ */
+.a { --ground:#1B211E; --ink:#F1ECE0; --ink2:#B6B1A3; --ink3:#7E7A6F; --rule:rgba(241,236,224,.16); --accent:#7CC6C4; --on-accent:#10201F; --strike:#F0836F; --glass:rgba(60,66,62,.55);
+     background:var(--ground); color:var(--ink); }
+.a .tb .circ, .a .tb .cap { color:var(--ink); }
+.a .body { position:absolute; inset:calc(var(--safe-top) + 52px) 0 0; display:flex; flex-direction:column; }
+.a .head { padding:0 20px; }
+.a .eyebrow { font:500 13px/18px var(--sf); color:var(--ink2); letter-spacing:.2px; display:flex; gap:8px; }
+.a h1 { margin:6px 0 0; font-family:var(--sf); font-stretch:80%; font-weight:800; font-size:40px; line-height:42px; letter-spacing:-.8px; text-transform:uppercase; }
+.a .people { display:flex; gap:8px; padding:20px 20px 0; }
+.a .p { height:40px; padding:0 16px; border-radius:20px; border:1.5px solid var(--rule); display:flex; align-items:center; gap:8px; font:600 15px/1 var(--sf); color:var(--ink); }
+.a .p.on { background:var(--accent); border-color:var(--accent); color:var(--on-accent); }
+.a .sum { padding:12px 20px 0; font:400 15px/20px var(--sf); color:var(--ink2); }
+.a .sum b { color:var(--ink); font-weight:600; }
+.a .list { flex:1; min-height:0; overflow:hidden; padding:8px 0 0; }
+.a .sec { padding:22px 20px 6px; font-family:var(--sf); font-stretch:80%; font-weight:700; font-size:15px; letter-spacing:1.2px; text-transform:uppercase; color:var(--ink2); display:flex; align-items:center; gap:12px; }
+.a .sec:after { content:""; flex:1; height:1px; background:var(--rule); }
+.a .row { position:relative; display:flex; gap:12px; padding:12px 20px 12px; align-items:flex-start; }
+.a .row + .row { border-top:1px solid var(--rule); }
+.a .nm { flex:1; min-width:0; }
+.a .en { font-family:var(--sf); font-stretch:80%; font-weight:700; font-size:22px; line-height:24px; letter-spacing:-.2px; text-transform:uppercase; position:relative; display:inline-block; }
+.a .th { font:400 15px/20px var(--sf); color:var(--ink2); margin-top:2px; }
+.a .what { font:400 14px/19px var(--sf); color:var(--ink2); margin-top:4px; }
+.a .pr { text-align:right; flex:none; padding-top:2px; }
+.a .pr .b { font-family:var(--sf); font-stretch:80%; font-weight:700; font-size:20px; line-height:24px; font-variant-numeric:tabular-nums; }
+.a .pr .e { font:400 13px/18px var(--sf); color:var(--ink3); font-variant-numeric:tabular-nums; }
+.a .row.no .en, .a .row.no .th, .a .row.no .what, .a .row.no .pr { color:var(--ink3); }
+.a .row.no .en svg { position:absolute; left:-4px; right:-6px; top:50%; height:12px; margin-top:-6px; width:calc(100% + 10px); overflow:visible; }
+.a .why { font:600 13px/18px var(--sf); color:var(--strike); margin-top:4px; }
+.a .ask { font:600 13px/18px var(--sf); color:var(--ink); margin-top:4px; border-bottom:1.5px dashed var(--ink2); display:inline-block; }
+.a .bar { position:absolute; left:20px; right:20px; bottom:30px; display:flex; gap:10px; z-index:20; }
+.a .bar .cap { flex:1; justify-content:center; height:56px; border-radius:28px; font-size:17px; }
+.a .bar .circ { width:56px; height:56px; border-radius:28px; }
+.a .fade { position:absolute; left:0; right:0; bottom:0; height:120px; background:linear-gradient(to bottom, rgba(27,33,30,0), rgba(27,33,30,.95) 70%); z-index:10; pointer-events:none; }
+
+/* ============ B. Plate ============ */
+.b { --ground:#F6F6F2; --raised:#FFFFFF; --ink:#1D1F1B; --ink2:#5E6159; --ink3:#8E9088; --rule:#E3E3DC; --accent:#D8432F; --on-accent:#fff; --plate:#FFFFFF; --rim:#E9E9E3; --glass:rgba(255,255,255,.7);
+     background:var(--ground); color:var(--ink); }
+.b .tb .circ, .b .tb .cap { color:var(--ink); }
+.b .body { position:absolute; inset:calc(var(--safe-top) + 52px) 0 0; display:flex; flex-direction:column; }
+.b .head { padding:0 20px; }
+.b .eyebrow { font:500 13px/18px var(--sf); color:var(--ink2); }
+.b h1 { margin:4px 0 0; font-family:var(--sf-rounded); font-weight:800; font-size:34px; line-height:38px; letter-spacing:-.9px; }
+.b .people { display:flex; gap:14px; padding:18px 20px 0; align-items:flex-end; }
+.b .av { display:flex; flex-direction:column; align-items:center; gap:6px; font:600 13px/16px var(--sf); color:var(--ink2); }
+.b .av i { width:52px; height:52px; border-radius:26px; background:var(--raised); border:1.5px solid var(--rule); display:grid; place-items:center; font:800 20px/1 var(--sf-rounded); font-style:normal; color:var(--ink); }
+.b .av.on i { border:3px solid var(--ink); }
+.b .av.on { color:var(--ink); }
+.b .sum { padding:14px 20px 0; font:400 15px/20px var(--sf); color:var(--ink2); }
+.b .sum b { color:var(--ink); font-weight:700; }
+.b .grid { flex:1; min-height:0; overflow:hidden; display:grid; grid-template-columns:1fr 1fr; gap:22px 14px; padding:18px 20px 0; align-content:start; }
+.b .card { display:flex; flex-direction:column; gap:8px; }
+.b .plate { position:relative; width:100%; aspect-ratio:1; }
+.b .plate svg { width:100%; height:100%; display:block; }
+.b .pn { font-family:var(--sf-rounded); font-weight:800; font-size:18px; line-height:21px; letter-spacing:-.3px; }
+.b .pt { font:400 13px/17px var(--sf); color:var(--ink2); }
+.b .pp { font:600 15px/20px var(--sf); font-variant-numeric:tabular-nums; margin-top:2px; }
+.b .pp span { color:var(--ink3); font-weight:400; }
+.b .card.no .pn, .b .card.no .pt, .b .card.no .pp { color:var(--ink3); }
+.b .card.no .plate svg { opacity:.55; }
+.b .no-x { position:absolute; inset:0; }
+.b .why { font:600 13px/17px var(--sf); color:var(--accent); }
+.b .askt { font:600 13px/17px var(--sf); color:var(--ink); }
+.b .bar { position:absolute; left:20px; right:20px; bottom:30px; display:flex; gap:10px; z-index:20; }
+.b .bar .cap { flex:1; justify-content:center; height:56px; border-radius:28px; font-size:17px; background:var(--ink); color:#fff; }
+.b .bar .circ { width:56px; height:56px; border-radius:28px; }
+.b .fade { position:absolute; left:0; right:0; bottom:0; height:110px; background:linear-gradient(to bottom, rgba(246,246,242,0), rgba(246,246,242,.96) 70%); z-index:10; }
+
+/* ============ C. Numbered stall menu ============ */
+.c { --fine:#15663F; --ask:#B8860B; --no:#A8291E; --ink:#F8F1E0; --ink2:rgba(248,241,224,.72); --ink3:rgba(248,241,224,.5); --rule:rgba(248,241,224,.22); --glass:rgba(255,255,255,.18);
+     background:var(--fine); color:var(--ink); font-family:"Bricolage Grotesque", var(--sf); }
+.c .tb .circ, .c .tb .cap { color:var(--ink); }
+.c .body { position:absolute; inset:calc(var(--safe-top) + 52px) 0 0; display:flex; flex-direction:column; }
+.c .head { padding:0 20px; }
+.c .eyebrow { font:500 14px/18px "Bricolage Grotesque", var(--sf); color:var(--ink2); }
+.c h1 { margin:2px 0 0; font-family:"Bricolage Grotesque", var(--sf); font-weight:800; font-size:44px; line-height:44px; letter-spacing:-1.4px; font-variation-settings:"opsz" 96; }
+.c .seg { margin:18px 20px 0; height:44px; border-radius:22px; background:rgba(0,0,0,.22); padding:4px; display:flex; }
+.c .seg span { flex:1; display:grid; place-items:center; border-radius:18px; font:600 15px/1 "Bricolage Grotesque", var(--sf); color:var(--ink2); }
+.c .seg .on { background:var(--ink); color:var(--fine); }
+.c .groups { flex:1; min-height:0; overflow:hidden; margin-top:18px; display:flex; flex-direction:column; }
+.c .grp { padding:16px 20px 10px; }
+.c .grp.ask { background:var(--ask); }
+.c .grp.no { background:var(--no); flex:1; }
+.c .gh { display:flex; justify-content:space-between; align-items:baseline; font:700 13px/16px "Bricolage Grotesque", var(--sf); letter-spacing:1px; text-transform:uppercase; color:var(--ink2); padding-bottom:6px; }
+.c .row { display:flex; gap:14px; align-items:flex-start; padding:10px 0; border-top:1px solid var(--rule); }
+.c .num { font:800 40px/40px "Bricolage Grotesque", var(--sf); letter-spacing:-1.5px; width:60px; flex:none; font-variant-numeric:tabular-nums; font-variation-settings:"opsz" 96; }
+.c .nm { flex:1; min-width:0; padding-top:3px; }
+.c .en { font:700 19px/22px "Bricolage Grotesque", var(--sf); letter-spacing:-.3px; }
+.c .th { font:400 14px/18px var(--sf); color:var(--ink2); margin-top:1px; }
+.c .why { font:600 13px/17px "Bricolage Grotesque", var(--sf); color:var(--ink); margin-top:3px; }
+.c .pr { text-align:right; flex:none; padding-top:4px; }
+.c .pr .b { font:700 19px/22px "Bricolage Grotesque", var(--sf); font-variant-numeric:tabular-nums; }
+.c .pr .e { font:400 13px/17px var(--sf); color:var(--ink3); font-variant-numeric:tabular-nums; }
+.c .bar { position:absolute; left:20px; right:20px; bottom:30px; display:flex; gap:10px; z-index:20; }
+.c .bar .cap { flex:1; justify-content:center; height:56px; border-radius:28px; font:700 17px/1 "Bricolage Grotesque", var(--sf); background:var(--ink); color:var(--no); }
+.c .bar .circ { width:56px; height:56px; border-radius:28px; }
+</style></head><body>
+
+<!-- ================= A. CHALKBOARD ================= -->
+<section class="screen a" data-name="a-chalkboard" data-chrome="light" data-time="19:42">
+  <div class="tb">
+    <div class="circ glass"><svg class="ic" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="3"/><circle cx="12" cy="13.5" r="3.5"/><path d="M9 7l1.4-2.6h3.2L15 7"/></svg></div>
+    <div class="cap glass"><svg class="ic" viewBox="0 0 24 24"><path d="M6 3.5h12v17l-6-4-6 4z"/></svg>Picks · 2</div>
+  </div>
+  <div class="body">
+    <div class="head">
+      <div class="eyebrow"><span>ครัวป้านิด</span><span>·</span><span>Thai</span><span>·</span><span>11 dishes</span></div>
+      <h1>Auntie Nid's Kitchen</h1>
+    </div>
+    <div class="people">
+      <div class="p">Everyone</div>
+      <div class="p on"><svg class="ic" viewBox="0 0 24 24" style="width:18px;height:18px;stroke-width:2.4"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Els</div>
+      <div class="p">Luc</div>
+    </div>
+    <div class="sum">For Els: <b>6 fine</b>, 2 to ask about, 3 crossed out.</div>
+    <div class="list" data-scrolls>
+      <div class="sec">Salads and soups</div>
+      <div class="row no"><div class="nm"><span class="en">Som Tam Thai<svg viewBox="0 0 200 12" preserveAspectRatio="none"><path d="M2 7 C 40 4, 80 9, 120 6 S 180 4, 198 6" stroke="#F0836F" stroke-width="3.2" fill="none" stroke-linecap="round"/></svg></span><div class="th">ส้มตำไทย</div><div class="why">Peanuts, dried shrimp</div></div><div class="pr"><div class="b">฿70</div><div class="e">€1.90</div></div></div>
+      <div class="row"><div class="nm"><span class="en">Tom Kha Gai</span><div class="th">ต้มข่าไก่</div><div class="what">Coconut and galangal soup with chicken. Mild.</div></div><div class="pr"><div class="b">฿95</div><div class="e">€2.55</div></div></div>
+      <div class="sec">Mains</div>
+      <div class="row no"><div class="nm"><span class="en">Pad Thai, prawns<svg viewBox="0 0 200 12" preserveAspectRatio="none"><path d="M2 6 C 50 9, 90 3, 130 7 S 180 8, 198 5" stroke="#F0836F" stroke-width="3.2" fill="none" stroke-linecap="round"/></svg></span><div class="th">ผัดไทยกุ้งสด</div><div class="why">Peanuts, prawns</div></div><div class="pr"><div class="b">฿120</div><div class="e">€3.20</div></div></div>
+      <div class="row"><div class="nm"><span class="en">Green curry, chicken</span><div class="th">แกงเขียวหวานไก่</div><div class="what">Coconut curry with Thai basil and pea aubergine. Hot.</div><span class="ask">Usually has shrimp paste. Ask.</span></div><div class="pr"><div class="b">฿110</div><div class="e">€2.95</div></div></div>
+      <div class="row"><div class="nm"><span class="en">Pineapple fried rice</span><div class="th">ข้าวผัดสับปะรด</div><div class="what">Rice with pineapple, egg, raisins and cashews. Served in the pineapple.</div></div><div class="pr"><div class="b">฿130</div><div class="e">€3.45</div></div></div>
+      <div class="row"><div class="nm"><span class="en">Morning glory, stir-fried</span><div class="th">ผัดผักบุ้งไฟแดง</div><div class="what">Water spinach, garlic, chili, flash-fried.</div><span class="ask">Oyster sauce is likely. Ask.</span></div><div class="pr"><div class="b">฿60</div><div class="e">€1.60</div></div></div>
+      <div class="row"><div class="nm"><span class="en">Hat Yai fried chicken</span><div class="th">ไก่ทอดหาดใหญ่</div><div class="what">Southern-style fried chicken with crispy shallots.</div></div><div class="pr"><div class="b">฿90</div><div class="e">€2.40</div></div></div>
+    </div>
+  </div>
+  <div class="fade"></div>
+  <div class="bar">
+    <div class="cap glass"><svg class="ic" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h10"/></svg>Filters</div>
+    <div class="circ glass"><svg class="ic" viewBox="0 0 24 24"><path d="M12 3a4 4 0 0 1 4 4v5a4 4 0 0 1-8 0V7a4 4 0 0 1 4-4zM6 12a6 6 0 0 0 12 0M12 18v3"/></svg></div>
+  </div>
+</section>
+
+<!-- ================= B. PLATE ================= -->
+<section class="screen b" data-name="b-plate" data-time="19:42">
+  <div class="tb">
+    <div class="circ glass"><svg class="ic" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="3"/><circle cx="12" cy="13.5" r="3.5"/><path d="M9 7l1.4-2.6h3.2L15 7"/></svg></div>
+    <div class="cap glass"><svg class="ic" viewBox="0 0 24 24"><path d="M6 3.5h12v17l-6-4-6 4z"/></svg>Picks · 2</div>
+  </div>
+  <div class="body">
+    <div class="head">
+      <div class="eyebrow">ครัวป้านิด · Thai · 11 dishes</div>
+      <h1>Auntie Nid's Kitchen</h1>
+    </div>
+    <div class="people">
+      <div class="av"><i>∞</i>Everyone</div>
+      <div class="av on"><i>E</i>Els</div>
+      <div class="av"><i>L</i>Luc</div>
+      <div class="av"><i style="border-style:dashed;font-weight:400">+</i>Add</div>
+    </div>
+    <div class="sum">For Els: <b>6 fine</b>, 2 to ask about, 3 she can't have.</div>
+    <div class="grid" data-scrolls>
+      <!-- Tom Kha Gai -->
+      <div class="card">
+        <div class="plate"><svg viewBox="0 0 160 160"><circle cx="80" cy="80" r="76" fill="#fff" stroke="#E9E9E3" stroke-width="2"/><circle cx="80" cy="80" r="58" fill="#F3EEDC"/><circle cx="80" cy="82" r="48" fill="#F6E9C3"/><path d="M52 70c6-10 18-12 26-4" stroke="#C9A96B" stroke-width="4" fill="none" stroke-linecap="round"/><ellipse cx="96" cy="90" rx="12" ry="8" fill="#E8D7A6"/><ellipse cx="68" cy="96" rx="10" ry="7" fill="#E8D7A6"/><circle cx="98" cy="68" r="7" fill="#D9C291"/><path d="M60 60l8-12M106 104l10 10" stroke="#5B8C3A" stroke-width="3" stroke-linecap="round"/><circle cx="88" cy="100" r="3" fill="#D8432F"/></svg></div>
+        <div class="pn">Tom Kha Gai</div><div class="pt">ต้มข่าไก่ · coconut galangal soup</div><div class="pp">฿95 <span>· €2.55</span></div>
+      </div>
+      <!-- Som Tam (no) -->
+      <div class="card no">
+        <div class="plate"><svg viewBox="0 0 160 160"><circle cx="80" cy="80" r="76" fill="#fff" stroke="#E9E9E3" stroke-width="2"/><path d="M40 90c10-30 70-30 80 0-10 14-70 14-80 0z" fill="#CFE3A6"/><path d="M50 84l20-14M62 92l24-16M78 96l22-14M56 76l14 2M90 74l16 10" stroke="#9EC25A" stroke-width="3" stroke-linecap="round"/><path d="M70 80l6-9M98 84l6-9" stroke="#D8432F" stroke-width="4" stroke-linecap="round"/><circle cx="66" cy="98" r="3.5" fill="#B88956"/><circle cx="84" cy="100" r="3.5" fill="#B88956"/><circle cx="100" cy="96" r="3.5" fill="#B88956"/><path d="M112 60a10 10 0 0 1 0 20z" fill="#BFD24A"/></svg>
+          <svg class="no-x" viewBox="0 0 160 160"><circle cx="80" cy="80" r="76" fill="none" stroke="#D8432F" stroke-width="5"/><path d="M28 28l104 104" stroke="#D8432F" stroke-width="5" stroke-linecap="round"/></svg></div>
+        <div class="pn">Som Tam Thai</div><div class="why">Peanuts, dried shrimp</div><div class="pp">฿70 <span>· €1.90</span></div>
+      </div>
+      <!-- Pad Thai (no) -->
+      <div class="card no">
+        <div class="plate"><svg viewBox="0 0 160 160"><circle cx="80" cy="80" r="76" fill="#fff" stroke="#E9E9E3" stroke-width="2"/><path d="M44 96c0-30 72-30 72 0s-72 30-72 0z" fill="#E7A95A"/><path d="M50 92c20-16 40 10 60-6M52 102c22-10 36 12 58-4M58 84c16-10 30 8 44-2" stroke="#D18A3A" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M70 78c6-8 16-6 18 2-6 6-14 4-18-2z" fill="#F0A090"/><path d="M92 92c6-8 16-6 18 2-6 6-14 4-18-2z" fill="#F0A090"/><path d="M118 70a9 9 0 0 1 0 18z" fill="#BFD24A"/><circle cx="60" cy="110" r="2.5" fill="#B88956"/><circle cx="68" cy="114" r="2.5" fill="#B88956"/><path d="M48 70l-8-10" stroke="#5B8C3A" stroke-width="3" stroke-linecap="round"/></svg>
+          <svg class="no-x" viewBox="0 0 160 160"><circle cx="80" cy="80" r="76" fill="none" stroke="#D8432F" stroke-width="5"/><path d="M28 28l104 104" stroke="#D8432F" stroke-width="5" stroke-linecap="round"/></svg></div>
+        <div class="pn">Pad Thai, prawns</div><div class="why">Peanuts, prawns</div><div class="pp">฿120 <span>· €3.20</span></div>
+      </div>
+      <!-- Green curry (ask) -->
+      <div class="card">
+        <div class="plate"><svg viewBox="0 0 160 160"><circle cx="80" cy="80" r="76" fill="#fff" stroke="#E9E9E3" stroke-width="2"/><circle cx="80" cy="80" r="56" fill="#E4E7D0"/><circle cx="80" cy="82" r="46" fill="#A9C27A"/><ellipse cx="70" cy="78" rx="12" ry="8" fill="#E8D7A6"/><ellipse cx="94" cy="92" rx="11" ry="7" fill="#E8D7A6"/><circle cx="92" cy="70" r="6" fill="#6E9A3C"/><circle cx="66" cy="96" r="5" fill="#6E9A3C"/><path d="M80 60c4-6 10-6 14-2-4 4-10 4-14 2z" fill="#4E7F2E"/><path d="M60 110c6-4 14-2 16 4-6 2-12 0-16-4z" fill="#4E7F2E"/><path d="M104 108l4-8" stroke="#D8432F" stroke-width="4" stroke-linecap="round"/></svg>
+          <svg class="no-x" viewBox="0 0 160 160"><circle cx="80" cy="80" r="76" fill="none" stroke="#1D1F1B" stroke-width="4" stroke-dasharray="6 9" stroke-linecap="round"/></svg></div>
+        <div class="pn">Green curry, chicken</div><div class="askt">Usually shrimp paste. Ask.</div><div class="pp">฿110 <span>· €2.95</span></div>
+      </div>
+      <!-- Pineapple rice -->
+      <div class="card">
+        <div class="plate"><svg viewBox="0 0 160 160"><circle cx="80" cy="80" r="76" fill="#fff" stroke="#E9E9E3" stroke-width="2"/><path d="M30 90c0-26 100-26 100 0-20 14-80 14-100 0z" fill="#E9C65A"/><path d="M36 86c20-8 68-8 88 0" stroke="#C9A33E" stroke-width="2" fill="none"/><path d="M42 94c18 8 58 8 76 0-18 6-58 6-76 0z" fill="#F4ECD2"/><circle cx="62" cy="92" r="4" fill="#F2D27A"/><circle cx="84" cy="96" r="4" fill="#F2D27A"/><circle cx="100" cy="90" r="4" fill="#F2D27A"/><circle cx="74" cy="98" r="2.5" fill="#6B4A2A"/><circle cx="92" cy="100" r="2.5" fill="#6B4A2A"/><path d="M118 72l10-26M124 74l16-20M112 70l2-28" stroke="#5B8C3A" stroke-width="4" stroke-linecap="round"/></svg></div>
+        <div class="pn">Pineapple fried rice</div><div class="pt">ข้าวผัดสับปะรด · cashews, egg</div><div class="pp">฿130 <span>· €3.45</span></div>
+      </div>
+      <!-- Morning glory (ask) -->
+      <div class="card">
+        <div class="plate"><svg viewBox="0 0 160 160"><circle cx="80" cy="80" r="76" fill="#fff" stroke="#E9E9E3" stroke-width="2"/><path d="M40 100c10-30 30-50 80-44-10 30-40 50-80 44z" fill="#6E9A3C"/><path d="M48 96c14-22 34-36 62-36M56 100c12-14 30-26 54-28M66 102c10-8 24-16 40-18" stroke="#4E7F2E" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M74 74l6-10M96 78l5-9" stroke="#D8432F" stroke-width="4" stroke-linecap="round"/><circle cx="60" cy="88" r="3" fill="#F3EEDC"/><circle cx="86" cy="94" r="3" fill="#F3EEDC"/></svg>
+          <svg class="no-x" viewBox="0 0 160 160"><circle cx="80" cy="80" r="76" fill="none" stroke="#1D1F1B" stroke-width="4" stroke-dasharray="6 9" stroke-linecap="round"/></svg></div>
+        <div class="pn">Morning glory</div><div class="askt">Oyster sauce likely. Ask.</div><div class="pp">฿60 <span>· €1.60</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="fade"></div>
+  <div class="bar">
+    <div class="cap"><svg class="ic" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h10"/></svg>Filters</div>
+    <div class="circ glass" style="color:var(--ink)"><svg class="ic" viewBox="0 0 24 24"><path d="M12 3a4 4 0 0 1 4 4v5a4 4 0 0 1-8 0V7a4 4 0 0 1 4-4zM6 12a6 6 0 0 0 12 0M12 18v3"/></svg></div>
+  </div>
+</section>
+
+<!-- ================= C. NUMBERED STALL MENU ================= -->
+<section class="screen c" data-name="c-stall-menu" data-chrome="light" data-time="19:42">
+  <div class="tb">
+    <div class="circ glass"><svg class="ic" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="3"/><circle cx="12" cy="13.5" r="3.5"/><path d="M9 7l1.4-2.6h3.2L15 7"/></svg></div>
+    <div class="cap glass"><svg class="ic" viewBox="0 0 24 24"><path d="M6 3.5h12v17l-6-4-6 4z"/></svg>Picks · 2</div>
+  </div>
+  <div class="body">
+    <div class="head">
+      <div class="eyebrow">ครัวป้านิด · Thai · order by number</div>
+      <h1>Auntie Nid's Kitchen</h1>
+    </div>
+    <div class="seg"><span>Everyone</span><span class="on">Els</span><span>Luc</span></div>
+    <div class="groups" data-scrolls>
+      <div class="grp fine">
+        <div class="gh"><span>Fine for Els</span><span>6</span></div>
+        <div class="row"><div class="num">02</div><div class="nm"><div class="en">Tom Kha Gai</div><div class="th">ต้มข่าไก่ · coconut galangal soup, chicken</div></div><div class="pr"><div class="b">฿95</div><div class="e">€2.55</div></div></div>
+        <div class="row"><div class="num">07</div><div class="nm"><div class="en">Pineapple fried rice</div><div class="th">ข้าวผัดสับปะรด · cashews, egg, raisins</div></div><div class="pr"><div class="b">฿130</div><div class="e">€3.45</div></div></div>
+        <div class="row"><div class="num">09</div><div class="nm"><div class="en">Hat Yai fried chicken</div><div class="th">ไก่ทอดหาดใหญ่ · crispy shallots</div></div><div class="pr"><div class="b">฿90</div><div class="e">€2.40</div></div></div>
+        <div class="row"><div class="num">14</div><div class="nm"><div class="en">Mango sticky rice</div><div class="th">ข้าวเหนียวมะม่วง · coconut cream</div></div><div class="pr"><div class="b">฿85</div><div class="e">€2.25</div></div></div>
+      </div>
+      <div class="grp ask">
+        <div class="gh"><span>Ask first</span><span>2</span></div>
+        <div class="row"><div class="num">05</div><div class="nm"><div class="en">Green curry, chicken</div><div class="th">แกงเขียวหวานไก่</div><div class="why">Usually shrimp paste. Ask: มีกะปิไหม</div></div><div class="pr"><div class="b">฿110</div><div class="e">€2.95</div></div></div>
+        <div class="row"><div class="num">08</div><div class="nm"><div class="en">Morning glory</div><div class="th">ผัดผักบุ้งไฟแดง</div><div class="why">Oyster sauce likely. Ask: ใส่น้ำมันหอยไหม</div></div><div class="pr"><div class="b">฿60</div><div class="e">€1.60</div></div></div>
+      </div>
+      <div class="grp no">
+        <div class="gh"><span>Not for Els</span><span>3</span></div>
+        <div class="row"><div class="num">01</div><div class="nm"><div class="en">Som Tam Thai</div><div class="th">ส้มตำไทย</div><div class="why">Peanuts, dried shrimp</div></div><div class="pr"><div class="b">฿70</div><div class="e">€1.90</div></div></div>
+        <div class="row"><div class="num">04</div><div class="nm"><div class="en">Pad Thai, prawns</div><div class="th">ผัดไทยกุ้งสด</div><div class="why">Peanuts, prawns</div></div><div class="pr"><div class="b">฿120</div><div class="e">€3.20</div></div></div>
+      </div>
+    </div>
+  </div>
+  <div class="bar">
+    <div class="cap"><svg class="ic" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h10"/></svg>Filters</div>
+    <div class="circ glass"><svg class="ic" viewBox="0 0 24 24"><path d="M12 3a4 4 0 0 1 4 4v5a4 4 0 0 1-8 0V7a4 4 0 0 1 4-4zM6 12a6 6 0 0 0 12 0M12 18v3"/></svg></div>
+  </div>
+</section>
+
+<script src="file:///Users/sam/.claude/skills/app-designer/assets/device.js"></script>
+</body></html>

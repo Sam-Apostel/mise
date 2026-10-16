@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Mise — current app (before)</title>
+<link rel="stylesheet" href="file:///Users/sam/.claude/skills/app-designer/assets/device.css">
+<style>
+:root{--page:#ECE7DD;--paper:#FBF8F1;--skeleton:#E1D9C6;--ink:#2B2B2B;--ink-soft:#444038;--muted:#9B958A;--hair:#CFC7B5;--accent:#E8743B;--accent-dark:#C2531F;--accent-tint:#FDEEE6;--veg:#2E7D4F;--veg-bg:#D9EFDF;--alert:#B03030;--alert-bg:#FDD9D9;--spice-bg:#FDE2CF}
+.screen{background:var(--page);color:var(--ink);font-family:var(--sf)}
+.nav{position:absolute;top:var(--safe-top);left:0;right:0;height:44px;display:flex;align-items:center;justify-content:center;font:600 17px/1 var(--sf);letter-spacing:-.4px}
+.nav .l,.nav .r{position:absolute;top:0;height:44px;display:flex;align-items:center;gap:6px;color:var(--accent);font:400 17px/1 var(--sf)}
+.nav .l{left:16px}.nav .r{right:16px}
+.body{position:absolute;top:calc(var(--safe-top) + 44px);left:0;right:0;bottom:0;display:flex;flex-direction:column}
+.serif{font-family:var(--ny)}
+/* scan */
+.scan{align-items:center;text-align:center;justify-content:center;gap:28px;padding:0 16px 16px}
+.vf{width:220px;height:280px;border-radius:20px;background:#2B2B2B;position:relative;display:grid;place-items:center}
+.vf:before{content:"";position:absolute;inset:20px;border:2px dashed var(--accent);border-radius:14px}
+.btn{background:var(--accent);color:#fff;border-radius:14px;padding:16px;font:600 17px/1.2 var(--sf);width:100%;text-align:center;display:flex;gap:8px;justify-content:center;align-items:center}
+/* browse */
+.chips{display:flex;gap:8px;padding:10px 16px;background:var(--paper);white-space:nowrap;overflow:hidden}
+.chip{border-radius:999px;padding:6px 10px;font:500 12px/1 var(--sf);background:rgba(207,199,181,.5);color:var(--ink-soft);display:inline-flex;gap:4px;align-items:center}
+.chip.on{background:var(--accent);color:#fff}
+.tabs{display:flex;gap:18px;padding:10px 16px 0;background:var(--paper);font:400 15px/1 var(--sf);color:var(--muted)}
+.tabs span{padding-bottom:8px;border-bottom:2px solid transparent}.tabs .on{color:var(--ink);font-weight:600;border-color:var(--accent)}
+.hr{height:1px;background:var(--hair)}
+.count{font:400 13px/18px var(--sf);color:var(--muted);padding:12px 16px}
+.row{display:flex;gap:12px;padding:12px 16px}
+.thumb{width:56px;height:56px;border-radius:10px;background:var(--skeleton);display:grid;place-items:center;color:var(--muted);flex:none}
+.row .t{flex:1;min-width:0}
+.row .n{display:flex;justify-content:space-between;align-items:baseline;font:600 17px/22px var(--ny)}
+.row .n b{font:400 15px/20px var(--sf);color:var(--ink-soft);font-variant-numeric:tabular-nums}
+.row .d{font:italic 400 15px/20px var(--sf);color:var(--muted);margin-top:4px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.tags{display:flex;gap:6px;margin-top:6px;white-space:nowrap;overflow:hidden}
+.tag{border-radius:999px;padding:5px 10px;font:500 12px/1 var(--sf);background:rgba(207,199,181,.5);color:var(--ink-soft)}
+.tag.pop{background:var(--accent-tint);color:var(--accent-dark)}.tag.sp{background:var(--spice-bg);color:var(--accent-dark)}
+.tag.veg{background:var(--veg-bg);color:var(--veg)}.tag.al{background:var(--alert-bg);color:var(--alert)}
+.row+.hr{margin-left:84px}
+/* detail */
+.det{padding:16px;gap:16px;overflow:hidden}
+.hero{height:220px;border-radius:14px;background:var(--skeleton);display:grid;place-items:center;color:var(--muted)}
+.det h1{font:700 28px/34px var(--ny);margin:0}
+.det .orig{font:italic 400 20px/25px var(--sf);color:var(--muted)}
+.det .price{font:600 20px/25px var(--sf);font-variant-numeric:tabular-nums;display:flex;gap:10px;align-items:center;margin-top:6px}
+.det p{font:400 17px/22px var(--sf);color:var(--ink-soft);margin:0}
+.det .cap{font:600 12px/16px var(--sf);color:var(--muted)}
+.det .oi{font:italic 400 16px/21px var(--sf);color:var(--muted);margin-top:4px}
+.bottom{position:absolute;left:0;right:0;bottom:0;padding:16px 16px 34px;background:rgba(251,248,241,.8);backdrop-filter:blur(18px)}
+</style></head><body>
+
+<section class="screen" data-name="before-scan" data-time="19:42">
+  <div class="nav">Menu Copilot</div>
+  <div class="body scan">
+    <div style="flex:1"></div>
+    <div class="vf"><svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="#E8743B" stroke-width="1.6" stroke-linecap="round"><path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3M8 9h8M8 12h8M8 15h5"/></svg></div>
+    <div>
+      <div class="serif" style="font:700 26px/32px var(--ny)">Point at any menu</div>
+      <div style="font:400 15px/20px var(--sf);color:var(--muted);padding:8px 16px 0">Snap or choose a photo of a menu and Menu Copilot turns it into a filterable list of dishes — with rich filters and images.</div>
+    </div>
+    <div style="flex:1"></div>
+    <div class="btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><rect x="3" y="7" width="18" height="13" rx="2"/><circle cx="12" cy="13.5" r="3.5"/><path d="M9 7l1.5-3h3L15 7"/></svg> Snap a menu</div>
+  </div>
+</section>
+
+<section class="screen" data-name="before-browse" data-time="19:42">
+  <div class="nav"><span class="l">Scan</span>Antonio's Trattoria<span class="r">Picks</span></div>
+  <div class="body">
+    <div class="chips" data-scrolls><span class="chip on">☰ Filters</span><span class="chip">Vegetarian ×</span><span class="chip">no dairy ×</span></div>
+    <div class="tabs" data-scrolls><span class="on">Menu</span><span>Starters</span><span>Mains</span><span>Desserts</span></div>
+    <div class="hr"></div>
+    <div class="count">All 4 dishes · tap Filters to narrow</div>
+    <div class="row"><div class="thumb">🍴</div><div class="t"><div class="n">Tagliatelle al Ragù <b>€16.00</b></div><div class="d">Fresh egg tagliatelle in a 4-hour beef & pork ragù, finished with parmigiano. A house classic, rich and savoury.</div><div class="tags" data-scrolls><span class="tag pop">★ popular</span><span class="tag sp">🌶</span><span class="tag al">contains gluten</span><span class="tag al">contains egg</span><span class="tag al">contains dairy</span></div></div></div><div class="hr"></div>
+    <div class="row"><div class="thumb">🍴</div><div class="t"><div class="n">Melanzane Parmigiana <b>€13.00</b></div><div class="d">Baked aubergine layered with tomato, basil and mozzarella.</div><div class="tags" data-scrolls><span class="tag veg">Vegetarian</span><span class="tag al">contains dairy</span></div></div></div><div class="hr"></div>
+    <div class="row"><div class="thumb">🍴</div><div class="t"><div class="n">Vitello Tonnato <b>€14.00</b></div><div class="d">Thin-sliced veal with a tuna-caper sauce.</div><div class="tags" data-scrolls><span class="tag al">contains fish</span><span class="tag al">contains egg</span></div></div></div><div class="hr"></div>
+    <div class="row"><div class="thumb">🍴</div><div class="t"><div class="n">Tiramisù <b>€7.00</b></div><div class="d">Coffee, mascarpone, cocoa.</div><div class="tags" data-scrolls><span class="tag veg">Vegetarian</span><span class="tag al">Contains alcohol</span><span class="tag al">contains dairy</span><span class="tag al">contains egg</span></div></div></div><div class="hr"></div>
+  </div>
+</section>
+
+<section class="screen" data-name="before-detail" data-time="19:42">
+  <div class="nav"><span class="l">‹ Back</span>Tagliatelle al Ragù</div>
+  <div class="body det">
+    <div class="hero">🍴</div>
+    <div><h1>Tagliatelle al Ragù</h1><div class="orig">Tagliatelle al Ragù</div><div class="price">€16.00 <span class="tag pop">★ popular · ordered a lot</span></div></div>
+    <div class="tags" data-scrolls><span class="tag sp">🌶</span><span class="tag al">contains gluten</span><span class="tag al">contains egg</span><span class="tag al">contains dairy</span></div>
+    <p>Fresh egg tagliatelle in a 4-hour beef & pork ragù, finished with parmigiano. A house classic, rich and savoury.</p>
+    <div><div class="cap">In the original</div><div class="oi">Tagliatelle all'uovo con ragù di manzo e maiale, parmigiano.</div></div>
+    <div><div class="cap">INGREDIENTS</div><div class="tags" style="margin-top:8px"><span class="tag">Pasta</span><span class="tag">Beef</span><span class="tag">Pork</span><span class="tag">Parmigiano</span></div></div>
+  </div>
+  <div class="bottom"><div class="btn">+ Add to my picks</div></div>
+</section>
+
+<script src="file:///Users/sam/.claude/skills/app-designer/assets/device.js"></script>
+</body></html>

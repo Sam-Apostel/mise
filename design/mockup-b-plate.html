@@ -1,0 +1,468 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Mise — screens</title>
+<link rel="stylesheet" href="file:///Users/sam/.claude/skills/app-designer/assets/device.css">
+<style>
+:root {
+  --ground:#F6F6F2; --raised:#FFFFFF; --plate:#FFFFFF; --rim:#E9E9E3;
+  --ink:#1D1F1B; --ink2:#595C55; --ink3:#6F726A; --rule:#E3E3DC;
+  --accent:#C3321F; --on-accent:#FFFFFF;
+  --rice:#F3ECD6; --broth:#F1DDA2; --amber:#E0A94A; --tan:#D9BC8B; --herb:#7CA25C; --leaf:#4F7D33;
+  --glass: rgba(255,255,255,.72);
+  --spring-smooth: linear(0, 0.157, 0.438, 0.66, 0.808, 0.897, 0.948, 0.976, 0.99, 0.997, 1);
+}
+.screen { background:var(--ground); color:var(--ink); font-family:var(--sf); font-optical-sizing:auto; container-type:size; }
+.screen[data-theme="dark"] {
+  --ground:#16171A; --raised:#232428; --plate:#EDEBE3; --rim:#D9D7CE;
+  --ink:#F2F2EE; --ink2:#B5B6AF; --ink3:#8B8D86; --rule:#2E2F33;
+  --accent:#E8604C; --on-accent:#16171A; --glass-dark: rgba(50,51,56,.6);
+  background:var(--ground); color:var(--ink);
+}
+.disp { font-family:var(--sf-rounded); font-weight:800; }
+.t-display { font-size:40px; line-height:42px; letter-spacing:-1.2px; }
+.t-title { font-size:34px; line-height:38px; letter-spacing:-.6px; }
+.t-name { font-size:20px; line-height:24px; letter-spacing:-.4px; }
+.t-body { font-size:17px; line-height:22px; letter-spacing:-.4px; }
+.t-sec { font-size:15px; line-height:20px; letter-spacing:-.2px; }
+.t-meta { font-size:13px; line-height:17px; letter-spacing:0; }
+.tnum { font-variant-numeric:tabular-nums; }
+svg.ic { width:22px; height:22px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; display:block; flex:none; }
+
+/* toolbar */
+.tb { position:absolute; top:var(--safe-top); left:16px; right:16px; height:44px; display:flex; justify-content:space-between; align-items:center; z-index:30; }
+.circ { width:44px; height:44px; border-radius:22px; display:grid; place-items:center; color:var(--ink); }
+.capb { height:44px; border-radius:22px; padding:0 16px 0 14px; display:flex; align-items:center; gap:8px; font:600 15px/1 var(--sf); letter-spacing:-.2px; color:var(--ink); }
+.body { position:absolute; inset:calc(var(--safe-top) + 52px) 0 0; display:flex; flex-direction:column; }
+.head { padding:0 20px; }
+.eyebrow { color:var(--ink2); }
+.eyebrow.t-meta { font-weight:500; }
+h1 { margin:4px 0 0; }
+
+/* people row */
+.people { display:flex; gap:14px; padding:18px 20px 0; }
+.av { display:flex; flex-direction:column; align-items:center; gap:6px; color:var(--ink2); font-weight:600; }
+.av i { width:52px; height:52px; border-radius:26px; background:var(--raised); border:1.5px solid var(--rule); display:grid; place-items:center; font-style:normal; color:var(--ink); }
+.av i.disp { font-size:20px; }
+.av i.add { border-style:dashed; color:var(--ink2); }
+.av.on { color:var(--ink); }
+.av.on i { border:3px solid var(--ink); }
+.screen[data-theme="dark"] .av i { background:var(--raised); border-color:#3A3B41; }
+.summary { padding:14px 20px 0; color:var(--ink2); }
+.summary b { color:var(--ink); font-weight:700; }
+
+/* list */
+.list { flex:1; min-height:0; overflow:hidden; padding-top:6px; }
+.sec { padding:22px 20px 4px; color:var(--ink2); font-weight:600; }
+.row { display:flex; gap:14px; padding:12px 20px; align-items:center; }
+.row + .row { border-top:1px solid var(--rule); margin-left:0; }
+.plate { position:relative; flex:none; width:84px; height:84px; }
+.plate svg { width:100%; height:100%; display:block; }
+.plate .ov { position:absolute; inset:0; z-index:1; }
+.row .nm { flex:1; min-width:0; }
+.row .th { color:var(--ink2); margin-top:3px; display:flex; align-items:center; gap:8px; }
+.chili { display:inline-flex; gap:1px; }
+.chili svg { width:12px; height:14px; display:block; }
+.pop { display:inline-flex; align-items:center; gap:4px; color:var(--ink2); font-weight:600; }
+.pop svg { width:11px; height:11px; display:block; }
+.row .what { color:var(--ink3); margin-top:3px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+.row .why { color:var(--accent); font-weight:600; margin-top:3px; }
+.row .ask { color:var(--ink); font-weight:600; margin-top:3px; }
+.row .pr { text-align:right; flex:none; }
+.row .pr .b { font-weight:600; }
+.row .pr .e { color:var(--ink3); margin-top:1px; }
+.row.no .en, .row.no .th, .row.no .pr .b { color:var(--ink3); }
+.row.no .plate::after { content:""; position:absolute; inset:5%; border-radius:50%; background:var(--plate); opacity:.6; }
+.row.no .chili { display:none; }
+.askbadge { position:absolute; right:-2px; bottom:-2px; width:26px; height:26px; border-radius:13px; background:var(--ink); color:var(--ground); display:grid; place-items:center; font:700 15px/1 var(--sf-rounded); }
+
+/* thumb zone */
+.bar { position:absolute; left:20px; right:20px; bottom:30px; display:flex; gap:10px; z-index:30; }
+.bar .cta { flex:1; height:56px; border-radius:28px; display:flex; align-items:center; justify-content:center; gap:10px; background:var(--ink); color:var(--ground); font:600 17px/1 var(--sf); letter-spacing:-.4px; }
+.bar .cta.sec2 { background:transparent; color:var(--ink); box-shadow:inset 0 0 0 1.5px var(--ink); }
+.bar .circ { width:56px; height:56px; border-radius:28px; }
+.fade { position:absolute; left:0; right:0; bottom:0; height:150px; z-index:20; pointer-events:none;
+  background:linear-gradient(to bottom, color-mix(in srgb, var(--ground) 0%, transparent), color-mix(in srgb, var(--ground) 92%, transparent) 42%, var(--ground) 62%); }
+
+/* ===== dish detail ===== */
+.detail .body { align-items:stretch; overflow:hidden; padding-bottom:120px; }
+.detail .body { display:block; }
+.hero { display:flex; justify-content:center; padding:8px 0 0; }
+.hero .plate { width:212px; height:212px; }
+.dtitle { padding:18px 20px 0; }
+.dtitle .th { color:var(--ink2); margin-top:2px; }
+.dtitle .price { margin-top:6px; font-weight:600; }
+.dtitle .price span { color:var(--ink3); font-weight:400; }
+.block { padding:24px 20px 0; }
+.block h3 { margin:0 0 8px; color:var(--ink2); font-weight:600; }
+.block p { margin:0; }
+.verd { display:flex; gap:12px; align-items:flex-start; padding:8px 0; }
+.verd + .verd { border-top:1px solid var(--rule); }
+.verd i { width:36px; height:36px; border-radius:18px; background:var(--raised); border:1.5px solid var(--rule); display:grid; place-items:center; font-style:normal; flex:none; }
+.verd .vt { flex:1; padding-top:2px; }
+.verd .vt b { font-weight:600; }
+.verd .vt .q { color:var(--ink2); margin-top:1px; }
+.verd.no .vt b { color:var(--accent); }
+.verd.no i { border-color:var(--accent); color:var(--accent); }
+.screen[data-theme="dark"] .verd i { border-color:#3A3B41; }
+
+/* ===== picks sheet ===== */
+.sheet { position:absolute; left:0; right:0; bottom:0; height:64%; background:var(--raised); border-radius:26px 26px 0 0; z-index:40; display:flex; flex-direction:column; box-shadow:0 -8px 40px rgba(0,0,0,.14); }
+.grab { width:36px; height:5px; border-radius:3px; background:var(--rule); margin:8px auto 0; }
+.sheet .sh { display:flex; justify-content:space-between; align-items:baseline; padding:14px 20px 4px; }
+.sheet .sh .t-name { font-family:var(--sf-rounded); font-weight:800; }
+.sheet .prow { display:flex; align-items:center; gap:12px; padding:10px 20px; }
+.sheet .prow + .prow { border-top:1px solid var(--rule); }
+.sheet .prow .plate { width:52px; height:52px; }
+.sheet .prow .qty { display:flex; align-items:center; gap:0; border:1.5px solid var(--rule); border-radius:22px; height:44px; padding:0 4px; flex:none; }
+.sheet .prow .qty span { width:34px; text-align:center; font-weight:700; font-family:var(--sf-rounded); }
+.sheet .prow .qty b { width:30px; height:36px; display:grid; place-items:center; font-weight:400; color:var(--ink); }
+.sheet .prow.swiped { transform:translateX(-64px); position:relative; }
+.sheet .remove { position:absolute; right:0; top:0; bottom:0; width:64px; background:var(--ink); color:var(--ground); display:grid; place-items:center; font-weight:600; }
+.sheet .swipewrap { position:relative; overflow:hidden; background:var(--raised); }
+.sheet .check { display:flex; align-items:center; gap:10px; padding:12px 20px 0; color:var(--ink2); }
+.sheet .check i { width:28px; height:28px; border-radius:14px; border:1.5px solid var(--rule); display:grid; place-items:center; font-style:normal; color:var(--ink); flex:none; }
+.sheet .prow .nm { flex:1; min-width:0; }
+.sheet .prow .nm .th { color:var(--ink2); }
+.sheet .prow .pr { font-weight:600; }
+.sheet .tot { display:flex; justify-content:space-between; align-items:baseline; padding:14px 20px 0; border-top:1px solid var(--rule); margin-top:4px; }
+.sheet .tot .e { color:var(--ink3); font-weight:400; }
+.scrim { position:absolute; inset:0; background:rgba(29,31,27,.22); z-index:35; }
+
+/* ===== waiter card ===== */
+.waiter .body { padding:4px 16px 0; justify-content:center; }
+.card { background:var(--raised); border-radius:26px; padding:24px 24px 24px; display:flex; flex-direction:column; gap:10px; overflow:hidden; box-shadow:0 1px 0 var(--rule); }
+.card .who { display:flex; align-items:center; gap:10px; color:var(--ink2); }
+.card .who i { width:32px; height:32px; border-radius:16px; border:2px solid var(--ink); display:grid; place-items:center; font-style:normal; color:var(--ink); }
+.under { padding:20px 8px 0; color:var(--ink3); text-align:center; }
+.card .line { display:flex; justify-content:space-between; align-items:baseline; gap:12px; }
+.card .thai { font-family:var(--sf-rounded); font-weight:800; letter-spacing:-.3px; }
+.card .en { color:var(--ink2); }
+.card .line { flex-direction:column; align-items:flex-start; gap:0; }
+.card .lead { color:var(--ink2); }
+.card .allergy { margin-top:10px; padding-top:16px; border-top:1.5px solid var(--rule); }
+.card .allergy .thai { color:var(--accent); }
+.card .allergy .en { color:var(--accent); }
+.card .thanks { margin-top:6px; color:var(--ink2); }
+.flip { display:none; }
+
+/* ===== camera ===== */
+.camera { background:#101113; }
+.camera .vf { position:absolute; inset:0 0 38% 0; background:#1A1B1F; overflow:hidden; border-radius:0 0 34px 34px; }
+.camera .paper { position:absolute; left:40px; top:104px; width:330px; padding:24px 24px; background:#F2EFE6; color:#2A2A26; transform:rotate(-4deg); border-radius:3px; box-shadow:0 20px 50px rgba(0,0,0,.5); }
+.camera .paper .ph { font-family:var(--sf-rounded); font-weight:800; font-size:24px; letter-spacing:-.4px; margin-bottom:14px; }
+.camera .paper .pl { display:flex; justify-content:space-between; font:400 16px/30px var(--sf); position:relative; }
+.camera .vf:after { content:""; position:absolute; left:0; right:0; bottom:0; height:150px; background:linear-gradient(to bottom, rgba(16,17,19,0), rgba(16,17,19,.85)); }
+.camera .paper .pl.found:after { content:""; position:absolute; left:-6px; right:-6px; top:2px; bottom:2px; border-radius:6px; background:rgba(29,31,27,.08); box-shadow:inset 0 0 0 1.5px rgba(29,31,27,.45); }
+.camera .status { position:absolute; left:0; right:0; bottom:18px; text-align:center; color:#fff; z-index:5; }
+.camera .status .t-meta { color:rgba(255,255,255,.7); margin-top:4px; }
+.camera .recent { position:absolute; left:0; right:0; bottom:0; height:38%; background:var(--ground); padding:20px 20px 0; }
+.camera .recent h2 { margin:0 0 6px; color:var(--ink2); font-weight:600; }
+.camera .rrow { display:flex; align-items:center; gap:12px; padding:10px 0; }
+.camera .rrow + .rrow { border-top:1px solid var(--rule); }
+.camera .rrow .plate { width:44px; height:44px; }
+.camera .rrow .nm { flex:1; }
+.camera .rrow .meta { color:var(--ink2); }
+.camera .rrow .chev { color:var(--ink3); }
+.camera .shutter { position:absolute; left:50%; bottom:calc(38% + 70px); transform:translateX(-50%); width:64px; height:64px; border-radius:32px; background:#fff; box-shadow:0 0 0 4px rgba(255,255,255,.35); z-index:6; }
+.camera .shutter:after { content:""; position:absolute; inset:5px; border-radius:50%; border:2px solid #101113; }
+.camera .tb .circ, .camera .tb .capb { color:#fff; --glass:rgba(255,255,255,.18); }
+
+/* ===== storyboard ===== */
+.story { background:#E9E9E4; }
+.story .grid { position:absolute; inset:0; display:grid; grid-template-columns:1fr 1fr; grid-template-rows:auto auto auto; gap:8px 12px; padding:20px 16px 12px; align-items:start; justify-items:center; }
+.story .cap { grid-column:1 / -1; justify-self:start; color:var(--ink2); }
+.story .cap b { color:var(--ink); font-weight:700; }
+.story .fr { display:flex; flex-direction:column; gap:6px; align-items:center; }
+.story .fr .lbl { color:var(--ink2); }
+.story .mini { box-shadow:0 10px 30px rgba(0,0,0,.14); }
+.mini-screen { background:var(--ground); color:var(--ink); font-family:var(--sf); }
+.mini-screen .body { inset:calc(var(--safe-top) + 52px) 0 0; }
+
+/* ===== icon ===== */
+.app-icon { background:#F6F6F2; }
+.app-icon svg { position:absolute; inset:0; width:100%; height:100%; }
+
+/* small phone */
+@container (max-height: 760px) {
+  .screen .summary { display:none; }
+  .screen .sheet { height:74%; }
+  .screen .sheet .prow { padding:8px 20px; }
+  .screen .sheet .prow .plate { width:44px; height:44px; }
+  .screen .sheet .check { display:none; }
+  .screen.waiter .card .thai.t-display { font-size:30px; line-height:34px; }
+  .screen.waiter .card .line { gap:0; }
+  .screen.waiter .under { display:none; }
+  .screen .hero .plate { width:150px; height:150px; }
+  .screen .block { padding-top:16px; }
+  .screen .block p.t-body { font-size:15px; line-height:20px; }
+  .screen.camera .paper { top:72px; padding:16px 20px; }
+  .screen.camera .paper .pl { line-height:26px; }
+  .screen.camera .paper .pl:nth-child(n+7) { display:none; }
+  .screen.waiter .body { bottom:70px; }
+  .screen.waiter .card { padding:20px 20px 18px; gap:6px; }
+  .screen.waiter .card .thai.t-title { font-size:28px; line-height:32px; }
+  .screen.waiter .card .allergy { margin-top:4px; padding-top:10px; }
+  .screen.waiter .flip { bottom:30px; }
+}
+</style></head><body>
+
+<!-- 1. MENU, light -->
+<section class="screen" data-name="menu" data-time="19:42">
+  <div class="tb">
+    <div class="circ glass"><svg class="ic" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="3"/><circle cx="12" cy="13.5" r="3.5"/><path d="M9 7l1.4-2.6h3.2L15 7"/></svg></div>
+    <div class="capb glass"><svg class="ic" viewBox="0 0 24 24"><path d="M6 3.5h12v17l-6-4-6 4z"/></svg>Picks · 2</div>
+  </div>
+  <div class="body">
+    <div class="head">
+      <div class="eyebrow t-meta">ครัวป้านิด · Thai · 11 dishes</div>
+      <h1 class="disp t-title">Auntie Nid's Kitchen</h1>
+    </div>
+    <div class="people t-meta" data-people="els"></div>
+    <div class="summary t-sec">For Els: <b>6 fine</b>, 2 to ask about, 3 she can't have.</div>
+    <div class="list" data-scrolls data-menu="els"></div>
+  </div>
+  <div class="fade"></div>
+  <div class="bar" data-float>
+    <div class="cta"><svg class="ic" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h10"/></svg>Filters</div>
+    <div class="circ glass"><svg class="ic" viewBox="0 0 24 24"><path d="M12 3a4 4 0 0 1 4 4v5a4 4 0 0 1-8 0V7a4 4 0 0 1 4-4zM6 12a6 6 0 0 0 12 0M12 18v3"/></svg></div>
+  </div>
+</section>
+
+<!-- 2. DISH DETAIL -->
+<section class="screen detail" data-name="dish" data-time="19:43">
+  <div class="tb">
+    <div class="circ glass"><svg class="ic" viewBox="0 0 24 24"><path d="M14.5 5l-7 7 7 7"/></svg></div>
+    <div class="capb glass"><svg class="ic" viewBox="0 0 24 24"><path d="M6 3.5h12v17l-6-4-6 4z"/></svg>Picks · 2</div>
+  </div>
+  <div class="body" data-scrolls>
+    <div class="hero"><div class="plate"><i data-plate="greencurry"></i></div></div>
+    <div class="dtitle">
+      <h1 class="disp t-title">Green curry, chicken</h1>
+      <div class="th t-body">แกงเขียวหวานไก่</div>
+      <div class="price t-body tnum">฿110 <span>· €2.95</span></div>
+    </div>
+    <div class="block">
+      <h3 class="t-meta">For the table</h3>
+      <div class="verd ask"><i class="disp t-sec">E</i><div class="vt t-sec"><b>Els: usually has shrimp paste. Ask.</b><div class="q">มีกะปิไหม · "Does it have shrimp paste?"</div></div></div>
+      <div class="verd no"><i class="disp t-sec">L</i><div class="vt t-sec"><b>Not for Luc: hot, he keeps to mild.</b><div class="q"><span class="chili" style="vertical-align:-2px"></span><span class="chili" id="c3"></span><span></span> on this menu's scale</div></div></div>
+    </div>
+    <div class="block">
+      <h3 class="t-meta">What it is</h3>
+      <p class="t-sec" style="color:var(--ink3);margin-bottom:8px">แกงเขียวหวานไก่ เสิร์ฟพร้อมข้าวสวย · from the menu</p>
+      <p class="t-body">Coconut-milk curry with green chili paste, Thai basil, pea aubergine and bamboo shoot. One of the hotter curries on a Thai menu. Served with rice.</p>
+    </div>
+    <div class="block">
+      <h3 class="t-meta">Contains</h3>
+      <p class="t-sec">Chicken, coconut milk, green chili, Thai basil, pea aubergine, bamboo shoot, fish sauce. <span style="color:var(--ink2)">Probably shrimp paste.</span></p>
+    </div>
+  </div>
+  <div class="fade"></div>
+  <div class="bar" data-float>
+    <div class="cta sec2">Ask the waiter</div>
+    <div class="cta"><svg class="ic" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Add to picks</div>
+  </div>
+</section>
+
+<!-- 3. PICKS sheet over the menu -->
+<section class="screen" data-name="picks" data-time="20:06">
+  <div data-behind>
+    <div class="tb">
+      <div class="circ glass"><svg class="ic" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="3"/><circle cx="12" cy="13.5" r="3.5"/><path d="M9 7l1.4-2.6h3.2L15 7"/></svg></div>
+      <div class="capb glass"><svg class="ic" viewBox="0 0 24 24"><path d="M6 3.5h12v17l-6-4-6 4z"/></svg>Picks · 5</div>
+    </div>
+    <div class="body">
+      <div class="head">
+        <div class="eyebrow t-meta">ครัวป้านิด · Thai · 11 dishes</div>
+        <h1 class="disp t-title">Auntie Nid's Kitchen</h1>
+      </div>
+      <div class="people t-meta" data-people="everyone"></div>
+      <div class="summary t-sec">For everyone: <b>11 dishes</b>.</div>
+      <div class="list" data-scrolls data-menu="everyone"></div>
+    </div>
+  </div>
+  <div class="scrim"></div>
+  <div class="sheet">
+    <div class="grab"></div>
+    <div class="sh"><div class="t-name">Picks</div><div class="t-sec" style="color:var(--ink2)">for the table · 5 items</div></div>
+    <div class="prow"><div class="plate"><i data-plate="tomkha"></i></div><div class="nm"><div class="t-body" style="font-weight:600">Tom Kha Gai</div><div class="th t-meta">ต้มข่าไก่ · <span class="tnum">฿95</span></div></div><div class="qty t-body"><b>×</b><span>1</span><b>+</b></div></div>
+    <div class="prow"><div class="plate"><i data-plate="pineapple"></i></div><div class="nm"><div class="t-body" style="font-weight:600">Pineapple fried rice</div><div class="th t-meta">ข้าวผัดสับปะรด · <span class="tnum">฿260</span></div></div><div class="qty t-body"><b>–</b><span>2</span><b>+</b></div></div>
+    <div class="swipewrap"><div class="remove t-meta" style="font-weight:600">Remove</div><div class="prow swiped" data-bleed><div class="plate"><i data-plate="hatyai"></i></div><div class="nm"><div class="t-body" style="font-weight:600">Hat Yai fried chicken</div><div class="th t-meta">ไก่ทอดหาดใหญ่ · <span class="tnum">฿90</span></div></div><div class="qty t-body"><b>×</b><span>1</span><b>+</b></div></div></div>
+    <div class="prow"><div class="plate"><i data-plate="coconut"></i></div><div class="nm"><div class="t-body" style="font-weight:600">Fresh coconut</div><div class="th t-meta">น้ำมะพร้าว · <span class="tnum">฿40</span></div></div><div class="qty t-body"><b>×</b><span>1</span><b>+</b></div></div>
+    <div class="tot"><div class="t-body" style="font-weight:600">Total</div><div class="t-body tnum" style="font-weight:600">฿485 <span class="e">· €12.90</span></div></div>
+    <div class="check t-sec"><i class="disp t-meta">E</i>Nothing on this list that Els can't have.</div>
+    <div class="bar" style="position:absolute" data-float><div class="cta"><svg class="ic" viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="3"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>Show the waiter</div></div>
+  </div>
+</section>
+
+<!-- 4. WAITER CARD -->
+<section class="screen waiter" data-name="waiter-card" data-time="20:07">
+  <div class="tb">
+    <div class="circ glass"><svg class="ic" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></div>
+    <div class="capb glass" style="padding:0 16px"><svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8"/></svg>Bright</div>
+  </div>
+  <div class="body">
+    <div class="card">
+      <div class="who t-sec"><i class="disp t-sec">E</i>Order for Els · ขอสั่ง</div>
+      <div class="line"><div class="thai t-display">ต้มข่าไก่</div><div class="en t-sec">×1 · Tom Kha Gai</div></div>
+      <div class="line"><div class="thai t-display">ข้าวผัดสับปะรด</div><div class="en t-sec">×2 · Pineapple rice</div></div>
+      <div class="line"><div class="thai t-display">ไก่ทอดหาดใหญ่</div><div class="en t-sec">×1 · Fried chicken</div></div>
+      <div class="line"><div class="thai t-display">น้ำมะพร้าว</div><div class="en t-sec">×1 · Coconut</div></div>
+      <div class="allergy">
+        <div class="thai t-title">แพ้ถั่วลิสงและกุ้ง</div>
+        <div class="thai t-title">ไม่ใส่ถั่ว ไม่ใส่กุ้ง</div>
+        <div class="en t-sec" style="margin-top:6px">Allergic to peanuts and shrimp. No peanuts, no shrimp.</div>
+      </div>
+      <div class="thanks t-name disp">ขอบคุณค่ะ <span style="font-family:var(--sf);font-weight:400;color:var(--ink2)">· thank you</span></div>
+    </div>
+    <div class="under t-sec">Tap to flip to English</div>
+  </div>
+</section>
+
+<!-- 5. SIGNATURE: the no-sign -->
+<section class="screen story" data-name="signature-no-sign" data-chrome="none">
+  <div class="grid">
+    <div class="cap t-sec"><b>The no-sign.</b> Tap Els: a red ring draws around every plate she can't have, the slash lands with a haptic, the rows sink.</div>
+    <div class="fr"><div class="mini" style="--mini:.40"><div class="mini-screen" data-time="19:42" data-story="0"></div></div><div class="lbl t-meta">0 ms · Everyone</div></div>
+    <div class="fr"><div class="mini" style="--mini:.40"><div class="mini-screen" data-time="19:42" data-story="1"></div></div><div class="lbl t-meta">180 ms · rings drawing</div></div>
+    <div class="fr"><div class="mini" style="--mini:.40"><div class="mini-screen" data-time="19:42" data-story="2"></div></div><div class="lbl t-meta">320 ms · slash lands, haptic</div></div>
+    <div class="fr"><div class="mini" style="--mini:.40"><div class="mini-screen" data-time="19:42" data-story="3"></div></div><div class="lbl t-meta">720 ms · rows settled</div></div>
+  </div>
+</section>
+
+<!-- 6. MENU, dark -->
+<section class="screen" data-name="menu-dark" data-theme="dark" data-time="21:15">
+  <div class="tb">
+    <div class="circ glass"><svg class="ic" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="3"/><circle cx="12" cy="13.5" r="3.5"/><path d="M9 7l1.4-2.6h3.2L15 7"/></svg></div>
+    <div class="capb glass"><svg class="ic" viewBox="0 0 24 24"><path d="M6 3.5h12v17l-6-4-6 4z"/></svg>Picks · 2</div>
+  </div>
+  <div class="body">
+    <div class="head">
+      <div class="eyebrow t-meta">ครัวป้านิด · Thai · 11 dishes</div>
+      <h1 class="disp t-title">Auntie Nid's Kitchen</h1>
+    </div>
+    <div class="people t-meta" data-people="els"></div>
+    <div class="summary t-sec">For Els: <b>6 fine</b>, 2 to ask about, 3 she can't have.</div>
+    <div class="list" data-scrolls data-menu="els"></div>
+  </div>
+  <div class="fade"></div>
+  <div class="bar" data-float>
+    <div class="cta"><svg class="ic" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h10"/></svg>Filters</div>
+    <div class="circ glass"><svg class="ic" viewBox="0 0 24 24"><path d="M12 3a4 4 0 0 1 4 4v5a4 4 0 0 1-8 0V7a4 4 0 0 1 4-4zM6 12a6 6 0 0 0 12 0M12 18v3"/></svg></div>
+  </div>
+</section>
+
+<!-- 7. CAMERA, first screen -->
+<section class="screen camera" data-name="camera" data-chrome="light" data-home="dark" data-time="19:41">
+  <div class="vf">
+    <div class="paper" data-bleed>
+      <div class="ph">ครัวป้านิด</div>
+      <div class="pl found"><span>ส้มตำไทย</span><span>70</span></div>
+      <div class="pl found"><span>ต้มข่าไก่</span><span>95</span></div>
+      <div class="pl found"><span>ผัดไทยกุ้งสด</span><span>120</span></div>
+      <div class="pl found"><span>แกงเขียวหวานไก่</span><span>110</span></div>
+      <div class="pl found"><span>ข้าวผัดสับปะรด</span><span>130</span></div>
+      <div class="pl found"><span>ผัดผักบุ้งไฟแดง</span><span>60</span></div>
+      <div class="pl found"><span>ไก่ทอดหาดใหญ่</span><span>90</span></div>
+    </div>
+    <div class="status"><div class="t-body" style="font-weight:600">Hold still, reading the menu</div><div class="t-meta">7 dishes so far</div></div>
+  </div>
+  <div class="tb">
+    <div class="circ glass"><svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></div>
+    <div class="capb glass"><svg class="ic" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M3 20a6 6 0 0 1 12 0M16 4.5a3.5 3.5 0 0 1 0 7M21 20a6 6 0 0 0-4.5-5.8"/></svg>Who's eating · 2</div>
+  </div>
+  <div class="shutter"></div>
+  <div class="recent">
+    <h2 class="t-meta">Recent · open without a connection</h2>
+    <div class="rrow"><div class="plate"><i data-plate="tomkha"></i></div><div class="nm"><div class="t-body" style="font-weight:600">Auntie Nid's Kitchen</div><div class="meta t-meta">Thai · 11 dishes · last night</div></div><svg class="ic chev" viewBox="0 0 24 24"><path d="M9.5 5l7 7-7 7"/></svg></div>
+    <div class="rrow"><div class="plate"><i data-plate="congee"></i></div><div class="nm"><div class="t-body" style="font-weight:600">Jok Prince</div><div class="meta t-meta">Thai · 6 dishes · Tuesday</div></div><svg class="ic chev" viewBox="0 0 24 24"><path d="M9.5 5l7 7-7 7"/></svg></div>
+  </div>
+</section>
+
+<!-- 8. APP ICON -->
+<section class="app-icon" data-name="icon">
+  <svg viewBox="0 0 1024 1024">
+    <rect width="1024" height="1024" fill="#F6F6F2"/>
+    <defs><filter id="sh" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="18" stdDeviation="22" flood-color="#1D1F1B" flood-opacity=".14"/></filter></defs>
+    <circle cx="512" cy="512" r="400" fill="#FFFFFF" filter="url(#sh)"/>
+    <circle cx="512" cy="512" r="400" fill="none" stroke="#6F726A" stroke-width="10"/>
+    <circle cx="512" cy="512" r="326" fill="none" stroke="#E9E9E3" stroke-width="12"/>
+    <circle cx="512" cy="520" r="258" fill="#7CA25C"/>
+    <ellipse cx="432" cy="480" rx="76" ry="52" fill="#F3ECD6"/>
+    <ellipse cx="588" cy="582" rx="68" ry="46" fill="#F3ECD6"/>
+    <path d="M560 384c40-50 110-40 130 10-40 30-100 20-130-10z" fill="#4F7D33"/>
+    <path d="M650 668l34-62" stroke="#C3321F" stroke-width="30" stroke-linecap="round"/>
+  </svg>
+</section>
+
+<script>
+/* ---- the drawn plate set: one hand, seven inks ---- */
+const INK = { rice:'#F3ECD6', broth:'#F1DDA2', amber:'#E0A94A', tan:'#D9BC8B', herb:'#7CA25C', leaf:'#4F7D33', chili:'#C3321F', plate:'var(--plate)', rim:'var(--rim)' };
+const base = (inner) => `<svg class="art" viewBox="0 0 160 160"><circle cx="80" cy="80" r="76" style="fill:${INK.plate};stroke:${INK.rim}" stroke-width="2"/>${inner}</svg>`;
+const PLATES = {
+  tomkha: base(`<circle cx="80" cy="80" r="58" fill="${INK.rice}"/><circle cx="80" cy="82" r="48" fill="${INK.broth}"/><path d="M52 70c6-10 18-12 26-4" stroke="${INK.tan}" stroke-width="4" fill="none" stroke-linecap="round"/><ellipse cx="96" cy="90" rx="12" ry="8" fill="${INK.rice}"/><ellipse cx="68" cy="96" rx="10" ry="7" fill="${INK.rice}"/><circle cx="98" cy="68" r="7" fill="${INK.tan}"/><path d="M60 60l8-12M106 104l10 10" stroke="${INK.leaf}" stroke-width="3" stroke-linecap="round"/><circle cx="88" cy="100" r="3" fill="${INK.chili}"/>`),
+  somtam: base(`<path d="M40 90c10-30 70-30 80 0-10 14-70 14-80 0z" fill="${INK.herb}" opacity=".55"/><path d="M50 84l20-14M62 92l24-16M78 96l22-14M56 76l14 2M90 74l16 10" stroke="${INK.herb}" stroke-width="3" stroke-linecap="round"/><path d="M70 80l6-9M98 84l6-9" stroke="${INK.chili}" stroke-width="4" stroke-linecap="round"/><circle cx="66" cy="98" r="3.5" fill="${INK.tan}"/><circle cx="84" cy="100" r="3.5" fill="${INK.tan}"/><circle cx="100" cy="96" r="3.5" fill="${INK.tan}"/><path d="M112 60a10 10 0 0 1 0 20z" fill="${INK.herb}"/>`),
+  padthai: base(`<path d="M44 96c0-30 72-30 72 0s-72 30-72 0z" fill="${INK.amber}"/><path d="M50 92c20-16 40 10 60-6M52 102c22-10 36 12 58-4M58 84c16-10 30 8 44-2" stroke="${INK.tan}" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M70 78c6-8 16-6 18 2-6 6-14 4-18-2z" fill="${INK.rice}"/><path d="M92 92c6-8 16-6 18 2-6 6-14 4-18-2z" fill="${INK.rice}"/><path d="M118 70a9 9 0 0 1 0 18z" fill="${INK.herb}"/><circle cx="60" cy="110" r="2.5" fill="${INK.tan}"/><circle cx="68" cy="114" r="2.5" fill="${INK.tan}"/><path d="M48 70l-8-10" stroke="${INK.leaf}" stroke-width="3" stroke-linecap="round"/>`),
+  greencurry: base(`<circle cx="80" cy="80" r="56" fill="${INK.rice}"/><circle cx="80" cy="82" r="46" fill="${INK.herb}"/><ellipse cx="70" cy="78" rx="12" ry="8" fill="${INK.rice}"/><ellipse cx="94" cy="92" rx="11" ry="7" fill="${INK.rice}"/><circle cx="92" cy="70" r="6" fill="${INK.leaf}"/><circle cx="66" cy="96" r="5" fill="${INK.leaf}"/><path d="M80 60c4-6 10-6 14-2-4 4-10 4-14 2z" fill="${INK.leaf}"/><path d="M60 110c6-4 14-2 16 4-6 2-12 0-16-4z" fill="${INK.leaf}"/><path d="M104 108l4-8" stroke="${INK.chili}" stroke-width="4" stroke-linecap="round"/>`),
+  pineapple: base(`<path d="M30 90c0-26 100-26 100 0-20 14-80 14-100 0z" fill="${INK.amber}"/><path d="M36 86c20-8 68-8 88 0" stroke="${INK.tan}" stroke-width="2" fill="none"/><path d="M42 94c18 8 58 8 76 0-18 6-58 6-76 0z" fill="${INK.rice}"/><circle cx="62" cy="92" r="4" fill="${INK.broth}"/><circle cx="84" cy="96" r="4" fill="${INK.broth}"/><circle cx="100" cy="90" r="4" fill="${INK.broth}"/><circle cx="74" cy="98" r="2.5" fill="${INK.tan}"/><circle cx="92" cy="100" r="2.5" fill="${INK.tan}"/><path d="M118 72l10-26M124 74l16-20M112 70l2-28" stroke="${INK.leaf}" stroke-width="4" stroke-linecap="round"/>`),
+  morningglory: base(`<path d="M40 100c10-30 30-50 80-44-10 30-40 50-80 44z" fill="${INK.herb}"/><path d="M48 96c14-22 34-36 62-36M56 100c12-14 30-26 54-28M66 102c10-8 24-16 40-18" stroke="${INK.leaf}" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M74 74l6-10M96 78l5-9" stroke="${INK.chili}" stroke-width="4" stroke-linecap="round"/><circle cx="60" cy="88" r="3" fill="${INK.rice}"/><circle cx="86" cy="94" r="3" fill="${INK.rice}"/>`),
+  hatyai: base(`<path d="M46 86c-2-16 14-26 28-18 10-8 26-4 30 10 10 2 16 14 8 22-10 10-54 12-66-4-4-4-2-8 0-10z" fill="${INK.amber}"/><path d="M58 76c8-6 18-4 22 4M84 70c8 0 14 6 14 12" stroke="${INK.tan}" stroke-width="3" fill="none" stroke-linecap="round"/><circle cx="62" cy="100" r="2.5" fill="${INK.tan}"/><circle cx="96" cy="104" r="2.5" fill="${INK.tan}"/><circle cx="110" cy="92" r="2.5" fill="${INK.tan}"/><path d="M116 70a9 9 0 0 1 0 18z" fill="${INK.herb}"/><path d="M44 62l-6-8" stroke="${INK.leaf}" stroke-width="3" stroke-linecap="round"/>`),
+  seabass: base(`<path d="M34 82c16-22 70-22 92 0-22 20-76 20-92 0z" fill="${INK.rice}"/><path d="M116 70l14-10-4 22-10-6" fill="${INK.tan}"/><path d="M48 82c12-8 56-8 70 0" stroke="${INK.tan}" stroke-width="2" fill="none"/><path d="M60 76l6-4M72 74l6-4M84 74l6-4M96 76l6-4" stroke="${INK.tan}" stroke-width="2" stroke-linecap="round"/><circle cx="50" cy="80" r="2.5" fill="${INK.leaf}"/><path d="M40 106a10 10 0 0 1 20 0z" fill="${INK.herb}"/><path d="M96 100l6-10" stroke="${INK.chili}" stroke-width="4" stroke-linecap="round"/><path d="M110 102l10 6" stroke="${INK.leaf}" stroke-width="3" stroke-linecap="round"/>`),
+  mango: base(`<path d="M44 96c0-18 30-24 40-10 8-10 32-6 32 10-6 12-18 18-36 16-16-2-30-6-36-16z" fill="${INK.rice}"/><path d="M78 60c20-14 44 4 38 30-10-4-18-8-26-6-8-6-14-14-12-24z" fill="${INK.amber}"/><path d="M50 102c10 6 24 8 36 6" stroke="${INK.tan}" stroke-width="2" fill="none" stroke-linecap="round"/><circle cx="60" cy="90" r="2.5" fill="${INK.tan}"/><circle cx="70" cy="96" r="2.5" fill="${INK.tan}"/><path d="M52 112c6 2 12 2 18 0" stroke="${INK.broth}" stroke-width="3" fill="none" stroke-linecap="round"/>`),
+  coconut: base(`<circle cx="80" cy="84" r="40" fill="${INK.tan}"/><circle cx="80" cy="84" r="40" fill="none" stroke="${INK.rice}" stroke-width="6" opacity=".7"/><circle cx="80" cy="84" r="22" fill="${INK.rice}"/><path d="M92 50l10-22" stroke="${INK.leaf}" stroke-width="4" stroke-linecap="round"/><path d="M86 52l4-10" stroke="${INK.herb}" stroke-width="4" stroke-linecap="round"/>`),
+  thaitea: base(`<rect x="56" y="34" width="48" height="90" rx="10" fill="${INK.amber}"/><rect x="56" y="34" width="48" height="26" rx="10" fill="${INK.rice}"/><rect x="56" y="48" width="48" height="12" fill="${INK.broth}"/><path d="M90 24l-6 28" stroke="${INK.leaf}" stroke-width="4" stroke-linecap="round"/><circle cx="68" cy="100" r="4" fill="${INK.tan}"/><circle cx="84" cy="110" r="4" fill="${INK.tan}"/>`),
+  congee: base(`<circle cx="80" cy="80" r="58" fill="${INK.rice}"/><circle cx="80" cy="82" r="48" fill="${INK.broth}" opacity=".6"/><circle cx="74" cy="80" r="12" fill="${INK.amber}"/><circle cx="74" cy="80" r="6" fill="${INK.broth}"/><path d="M96 92l12 8M58 100l-8 10" stroke="${INK.leaf}" stroke-width="3" stroke-linecap="round"/><circle cx="100" cy="72" r="3" fill="${INK.tan}"/>`)
+};
+/* verdict overlays */
+const NO = (prog=1) => { const C = 2*Math.PI*74; return `<svg class="ov" viewBox="0 0 160 160"><circle cx="80" cy="80" r="74" fill="none" stroke="#C3321F" stroke-width="5" stroke-linecap="round" stroke-dasharray="${C}" stroke-dashoffset="${C*(1-Math.min(prog,1))}" transform="rotate(-90 80 80)"/>${prog>=1.2?`<path d="M31 31l98 98" stroke="#C3321F" stroke-width="5" stroke-linecap="round"/>`:''}</svg>`; };
+const ASK = `<div class="askbadge">?</div>`;
+const CHILI = `<svg viewBox="0 0 12 14"><path d="M9.5 1.5c.4 1.6-.2 3-1.4 3.8M8.2 4.6C9.6 7.4 7.8 12 4.2 12.6 1.4 13 .4 10 1.6 7.6 2.6 5.6 5 4.4 8.2 4.6z" fill="#E0A94A" stroke="#E0A94A" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+const STAR = `<svg viewBox="0 0 24 24"><path d="M12 2.5l2.9 6.2 6.6.8-4.9 4.6 1.3 6.6L12 17.4l-5.9 3.3 1.3-6.6L2.5 9.5l6.6-.8z" fill="currentColor"/></svg>`;
+
+document.querySelectorAll('i[data-plate]').forEach(i => { i.outerHTML = PLATES[i.dataset.plate]; });
+
+/* ---- the menu, rendered from one source ---- */
+const DISHES = [
+  { c:'Salads and soups', k:'tomkha', en:'Tom Kha Gai', th:'ต้มข่าไก่', what:'Coconut and galangal soup with chicken. Mild.', b:'฿95', e:'€2.55', els:'ok', luc:'ok', spice:1, pop:true },
+  { c:'Salads and soups', k:'somtam', en:'Som Tam Thai', th:'ส้มตำไทย', what:'Green papaya salad, pounded with lime, chili and dried shrimp. Hot.', b:'฿70', e:'€1.90', els:'no', why:'Peanuts, dried shrimp', luc:'no', whyl:'Hot', spice:3 },
+  { c:'Mains', k:'pineapple', en:'Pineapple fried rice', th:'ข้าวผัดสับปะรด', what:'Fried rice with pineapple, egg, raisins and cashews, served in the pineapple.', b:'฿130', e:'€3.45', els:'ok', luc:'ok' },
+  { c:'Mains', k:'hatyai', en:'Hat Yai fried chicken', th:'ไก่ทอดหาดใหญ่', what:'Southern fried chicken with crispy shallots.', b:'฿90', e:'€2.40', els:'ok', luc:'ok' },
+  { c:'Mains', k:'greencurry', en:'Green curry, chicken', th:'แกงเขียวหวานไก่', what:'Coconut curry with Thai basil and pea aubergine. Hot.', b:'฿110', e:'€2.95', els:'ask', askt:'Usually has shrimp paste. Ask.', luc:'no', whyl:'Hot', spice:3 },
+  { c:'Mains', k:'morningglory', en:'Morning glory, stir-fried', th:'ผัดผักบุ้งไฟแดง', what:'Water spinach flash-fried with garlic and chili.', b:'฿60', e:'€1.60', els:'ask', askt:'Oyster sauce is likely. Ask.', luc:'ok', spice:2 },
+  { c:'Mains', k:'padthai', en:'Pad Thai, prawns', th:'ผัดไทยกุ้งสด', what:'Rice noodles, prawns, egg, bean sprouts, peanuts on top.', b:'฿120', e:'€3.20', els:'no', why:'Peanuts, prawns', luc:'ok', spice:1, pop:true },
+  { c:'Mains', k:'seabass', en:'Steamed sea bass, lime', th:'ปลากะพงนึ่งมะนาว', what:'Whole fish steamed with lime, garlic and chili.', b:'฿280', e:'€7.45', els:'ok', luc:'ok', spice:2 },
+  { c:'Sweet', k:'mango', en:'Mango sticky rice', th:'ข้าวเหนียวมะม่วง', what:'Sweet sticky rice with ripe mango and coconut cream.', b:'฿85', e:'€2.25', els:'ok', luc:'ok' },
+];
+function row(d, who, prog) {
+  const v = who === 'everyone' ? 'ok' : (who === 'els' ? d.els : d.luc);
+  const why = who === 'els' ? d.why : d.whyl;
+  const cls = v === 'no' && prog >= 1.2 ? 'row no' : 'row';
+  const ov = v === 'no' && prog > 0 ? NO(prog) : (v === 'ask' ? ASK : '');
+  const line = v === 'no' && prog >= 1.2 ? `<div class="why t-sec">${why}</div>` : (v === 'ask' ? `<div class="ask t-sec">${d.askt}</div>` : `<div class="what t-sec">${d.what}</div>`);
+  const marks = (d.spice?`<span class="chili">${CHILI.repeat(d.spice)}</span>`:'') + (d.pop?`<span class="pop t-meta">${STAR}popular</span>`:'');
+  return `<div class="${cls}"><div class="plate">${PLATES[d.k]}${ov}</div><div class="nm"><div class="en disp t-name">${d.en}</div><div class="th t-body"><span>${d.th}</span>${marks}</div>${line}</div><div class="pr"><div class="b t-body tnum">${d.b}</div><div class="e t-meta tnum">${d.e}</div></div></div>`;
+}
+function menu(who, prog = 2, sort = true) {
+  const courses = [...new Set(DISHES.map(d => d.c))];
+  return courses.map(c => {
+    let ds = DISHES.filter(d => d.c === c);
+    if (sort && who !== 'everyone') { const rank = d => ({ok:0, ask:1, no:2})[who==='els'?d.els:d.luc]; ds = [...ds].sort((a,b)=>rank(a)-rank(b)); }
+    return `<div class="sec t-meta">${c}</div>` + ds.map(d => row(d, who, prog)).join('');
+  }).join('');
+}
+function people(who) {
+  const p = (k, label, init) => `<div class="av ${who===k?'on':''}"><i class="disp">${init}</i>${label}</div>`;
+  return p('everyone','Everyone','∞') + p('els','Els','E') + p('luc','Luc','L') + `<div class="av"><i class="add">+</i>Add</div>`;
+}
+const c3=document.getElementById('c3'); if(c3) c3.innerHTML=CHILI.repeat(3);
+document.querySelectorAll('[data-menu]').forEach(el => { el.innerHTML = menu(el.dataset.menu); });
+document.querySelectorAll('[data-people]').forEach(el => { el.innerHTML = people(el.dataset.people); });
+
+/* storyboard frames: who / ring progress / sorted */
+const STORY = [ ['everyone', 0, false], ['els', 0.55, false], ['els', 1.4, false], ['els', 2, true] ];
+document.querySelectorAll('[data-story]').forEach(el => {
+  const [who, prog, sort] = STORY[+el.dataset.story];
+  const sum = who === 'everyone' ? 'For everyone: <b>9 dishes</b>.' : (sort ? 'For Els: <b>6 fine</b>, 2 to ask about, 3 she can\'t have.' : 'For Els: <b>…</b>');
+  el.innerHTML = `<div class="body"><div class="head"><div class="eyebrow t-meta">ครัวป้านิด · Thai · 11 dishes</div><h1 class="disp t-title">Auntie Nid's Kitchen</h1></div><div class="people t-meta">${people(who)}</div><div class="summary t-sec">${sum}</div><div class="list" data-scrolls>${menu(who, prog, sort)}</div></div>`;
+});
+</script>
+<script src="file:///Users/sam/.claude/skills/app-designer/assets/device.js"></script>
+</body></html>
