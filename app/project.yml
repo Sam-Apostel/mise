@@ -11,8 +11,8 @@ settings:
     SWIFT_VERSION: "6.0"
     MARKETING_VERSION: "0.1.0"
     CURRENT_PROJECT_VERSION: "1"
-    # Set your Apple Developer team here (or via an .xcconfig) before running on device.
-    DEVELOPMENT_TEAM: ""
+    DEVELOPMENT_TEAM: Y3734CNKQ8
+    CODE_SIGN_STYLE: Automatic
     SWIFT_STRICT_CONCURRENCY: complete
 
 packages:
@@ -41,8 +41,13 @@ targets:
         INFOPLIST_KEY_UISupportedInterfaceOrientations: "UIInterfaceOrientationPortrait"
         INFOPLIST_KEY_NSCameraUsageDescription: "Mise uses the camera to scan menus."
         INFOPLIST_KEY_NSPhotoLibraryUsageDescription: "Mise reads menu photos you choose from your library."
-        # Backend base URL — point at your Railway deployment for device builds.
-        INFOPLIST_KEY_MiseAPIBaseURL: "http://localhost:8080"
+      # Backend base URL, read by AppConfig.apiBaseURL. Debug talks to a local
+      # `make server-run`; Release talks to the Railway deployment.
+      configs:
+        Debug:
+          INFOPLIST_KEY_MiseAPIBaseURL: "http://localhost:8080"
+        Release:
+          INFOPLIST_KEY_MiseAPIBaseURL: "https://server-production.up.railway.app"
 
   MiseTests:
     type: bundle.unit-test
