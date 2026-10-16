@@ -271,7 +271,7 @@ enum SeedData {
             restaurantName: "Jok Prince", originalRestaurantName: "โจ๊กปรินซ์",
             cuisine: "Thai", sourceLanguage: "th", currency: "THB",
             scannedAt: Calendar.current.date(byAdding: .day, value: -4, to: .now),
-            dishes: jayDaeng.dishes.suffix(1) + [])
+            dishes: jayDaeng.dishes.reversed())
         menu.dishes[0].imageURL = commons("Jok mu sap.JPG")
         return menu
     }

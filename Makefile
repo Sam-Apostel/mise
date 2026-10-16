@@ -1,6 +1,6 @@
 .PHONY: help shared server-build server-run server-test app-gen app-build app-test test docker railway-deploy
 
-SIM ?= iPhone 17
+SIM ?= iPhone 18 Pro
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-16s\033[0m %s\n", $$1, $$2}'

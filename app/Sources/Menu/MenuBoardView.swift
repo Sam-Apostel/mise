@@ -67,6 +67,12 @@ struct MenuBoardView: View {
         .sensoryFeedback(.selection, trigger: model.selectedProfileID)
         .sensoryFeedback(.impact(weight: .light), trigger: landed)
         .onAppear { settle() }
+        .task {
+            // `-seedTapPerson els`: plays the chalk strike once, for recording the signature.
+            guard let name = UserDefaults.standard.string(forKey: "seedTapPerson") else { return }
+            try? await Task.sleep(for: .seconds(2))
+            select(model.profiles.first { $0.name.lowercased() == name }?.id)
+        }
         .onReceive(NotificationCenter.default.publisher(for: .seedScreen)) { note in
             switch note.object as? String {
             case "picks": sheet = .picks
@@ -182,19 +188,24 @@ struct MenuBoardView: View {
         let profile = profile(for: sortID)
         let s = model.summary(for: profile)
         let filtered = model.filter.isActive
+        let verdicts = profile != nil || filtered
+        let who = profile.map { "fine for \($0.name)" } ?? "fine"
+        // One structure for both states, so the fine segment stays put and its count rolls
+        // while ask and no slide in beside it.
         return HStack(spacing: 4) {
-            if profile == nil && !filtered {
-                segment(count: s.total, label: "dishes · add a person to see what they can eat",
-                        color: Board.ink, border: Board.rule, kind: nil)
-            } else {
-                let who = profile.map { "fine for \($0.name)" } ?? "fine"
-                segment(count: s.fine, label: filtered ? "\(who) tonight" : who, color: Board.ink,
-                        border: Board.rule, kind: .fine)
-                segment(count: s.ask, label: "ask", color: s.ask == 0 ? Board.ink3 : Board.ask,
-                        border: s.ask == 0 ? Board.rule : Board.ask, kind: .ask)
-                segment(count: s.no, label: noLabel(profile: profile), color: Board.no, border: Board.no, kind: .no)
+            segment(count: verdicts ? s.fine : s.total,
+                    label: verdicts ? (filtered ? "\(who) tonight" : who) : "dishes · add a person to see what they can eat",
+                    color: Board.ink, border: Board.rule, kind: verdicts ? .fine : nil)
+            if verdicts {
+                Group {
+                    segment(count: s.ask, label: "ask", color: s.ask == 0 ? Board.ink3 : Board.ask,
+                            border: s.ask == 0 ? Board.rule : Board.ask, kind: .ask)
+                    segment(count: s.no, label: noLabel(profile: profile), color: Board.no, border: Board.no, kind: .no)
+                }
+                .transition(.move(edge: .trailing).combined(with: .opacity))
             }
         }
+        .clipped()
         .frame(height: 38)
     }
 
@@ -218,6 +229,8 @@ struct MenuBoardView: View {
                     .font(.boardHeavy(20, relativeTo: .title3))
                     .contentTransition(.numericText(value: Double(count)))
                 Text(label).font(.system(size: 13, weight: .semibold)).lineLimit(1)
+                    .id(label)
+                    .transition(.opacity.animation(.easeOut(duration: 0.12)))
             }
             .foregroundStyle(focused ? Board.ground : color)
             .padding(.horizontal, 12)
@@ -227,6 +240,9 @@ struct MenuBoardView: View {
             .contentShape(.rect)
         }
         .buttonStyle(PressStyle())
+        // Ask and no keep their size; the long fine label is the one that gives.
+        .fixedSize(horizontal: kind == .ask || kind == .no, vertical: false)
+        .layoutPriority(kind == .ask || kind == .no ? 1 : 0)
         .accessibilityLabel("\(count) \(label)")
         .accessibilityHint(kind == nil ? "" : "Shows only these dishes")
     }
