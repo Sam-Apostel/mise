@@ -45,9 +45,15 @@ targets:
       # `make server-run`; Release talks to the Railway deployment.
       configs:
         Debug:
-          INFOPLIST_KEY_MiseAPIBaseURL: "http://localhost:8080"
+          MISE_API_BASE_URL: "http://localhost:8080"
         Release:
-          INFOPLIST_KEY_MiseAPIBaseURL: "https://server-production-6f38.up.railway.app"
+          MISE_API_BASE_URL: "https://server-production-6f38.up.railway.app"
+    info:
+      path: Info.plist
+      properties:
+        CFBundleShortVersionString: "$(MARKETING_VERSION)"
+        CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
+        MiseAPIBaseURL: "$(MISE_API_BASE_URL)"
 
   MiseTests:
     type: bundle.unit-test
