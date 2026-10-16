@@ -17,5 +17,14 @@ public func configure(_ app: Application) async throws {
         app.logger.warning("ANTHROPIC_API_KEY not set — using the heuristic menu parser.")
     }
 
+    // Free dish-photo chain: Wikimedia Commons, then Pexels and Pixabay when keyed.
+    // No AI image generation and no paid APIs: photos must cost $0/month.
+    app.dishImages = .live(
+        pexelsKey: Environment.get("PEXELS_API_KEY"),
+        pixabayKey: Environment.get("PIXABAY_API_KEY")
+    )
+
+    app.phraseService = PhraseService(apiKey: app.menuParser.apiKey, model: app.menuParser.model)
+
     try routes(app)
 }

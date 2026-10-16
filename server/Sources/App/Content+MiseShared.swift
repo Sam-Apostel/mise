@@ -6,3 +6,7 @@ import MiseShared
 // the server target. `Content`'s protocol extensions supply the implementations.
 extension ParseMenuRequest: @retroactive Content {}
 extension ParseMenuResponse: @retroactive Content {}
+extension DishImagesRequest: @retroactive Content {}
+extension DishImagesResponse: @retroactive Content {}
+extension PhrasesRequest: @retroactive Content {}
+extension PhraseSet: @retroactive Content {}

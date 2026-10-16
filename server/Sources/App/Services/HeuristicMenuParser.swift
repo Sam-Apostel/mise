@@ -33,6 +33,7 @@ struct HeuristicMenuParser {
                 spiceLevel: Self.spiceLevel(for: line),
                 ingredients: [],
                 isPopular: false,
+                plate: .generic,
                 confidence: 0.4
             )
         }

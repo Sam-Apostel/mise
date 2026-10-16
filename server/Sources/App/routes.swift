@@ -8,6 +8,8 @@ func routes(_ app: Application) throws {
 
     let v1 = app.grouped(.constant(MiseAPI.versionPrefix))
     try v1.register(collection: MenuController())
+    try v1.register(collection: ImageController())
+    try v1.register(collection: PhraseController())
 }
 
 struct HealthResponse: Content {
