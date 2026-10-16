@@ -47,7 +47,7 @@ targets:
         Debug:
           INFOPLIST_KEY_MiseAPIBaseURL: "http://localhost:8080"
         Release:
-          INFOPLIST_KEY_MiseAPIBaseURL: "https://server-production.up.railway.app"
+          INFOPLIST_KEY_MiseAPIBaseURL: "https://server-production-6f38.up.railway.app"
 
   MiseTests:
     type: bundle.unit-test
