@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <path d="M700 492c104 0 188 80 188 180s-84 180-188 180c-30 0-58-6-84-18l-92 46 26-84c-24-30-38-66-38-104 0-100 84-200 188-200z" fill="#E8B84A"/>
+  <g fill="none" stroke="#0D5236" stroke-linecap="round" stroke-linejoin="round">
+    <!-- A -->
+    <path d="M572 760l58-170 58 170M594 704h72" stroke-width="22"/>
+    <!-- 文 -->
+    <path d="M770 586v26M722 622h108M742 640c14 60 48 104 92 124M812 640c-12 60-44 104-90 124" stroke-width="18"/>
+  </g>
+</svg>

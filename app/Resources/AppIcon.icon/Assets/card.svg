@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <g transform="rotate(-9 440 470)">
+    <rect x="236" y="196" width="408" height="548" rx="44" fill="#F8F1E0"/>
+    <g fill="none" stroke="#0D5236" stroke-linecap="round" stroke-linejoin="round">
+      <!-- fork -->
+      <path d="M376 290v74M404 290v74M432 290v74" stroke-width="18"/>
+      <path d="M376 364c0 26 12 40 28 40s28-14 28-40" stroke-width="18"/>
+      <path d="M404 404v120" stroke-width="22"/>
+      <!-- knife -->
+      <path d="M498 420v104" stroke-width="24"/>
+      <!-- lines -->
+      <path d="M318 594h244M318 648h244M318 702h150" stroke-width="22"/>
+    </g>
+    <path d="M484 284c46 16 66 70 58 140l-58 4z" fill="#0D5236"/>
+  </g>
+</svg>

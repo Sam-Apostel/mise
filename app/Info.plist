@@ -20,5 +20,11 @@
 	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>MiseAPIBaseURL</key>
 	<string>$(MISE_API_BASE_URL)</string>
+	<key>UIAppFonts</key>
+	<array>
+		<string>MiseBoard-Display.ttf</string>
+		<string>MiseBoard-Heavy.ttf</string>
+		<string>MiseBoard-Label.ttf</string>
+	</array>
 </dict>
 </plist>

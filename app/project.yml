@@ -54,6 +54,10 @@ targets:
         CFBundleShortVersionString: "$(MARKETING_VERSION)"
         CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
         MiseAPIBaseURL: "$(MISE_API_BASE_URL)"
+        UIAppFonts:
+          - MiseBoard-Display.ttf
+          - MiseBoard-Heavy.ttf
+          - MiseBoard-Label.ttf
 
   MiseTests:
     type: bundle.unit-test
