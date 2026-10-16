@@ -55,6 +55,17 @@ struct BrowseView: View {
     @ViewBuilder
     private func content(for menu: ParsedMenu) -> some View {
         VStack(spacing: 0) {
+            if session.parserUsed == "heuristic" {
+                // The AI parser failed and the server fell back to keyword matching.
+                Label("Basic parse only: allergens and translations may be wrong. Rescan to retry.",
+                      systemImage: "exclamationmark.triangle.fill")
+                    .font(.caption.weight(.medium))
+                    .foregroundStyle(Theme.warn)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal)
+                    .padding(.vertical, 8)
+                    .background(Theme.warnBg)
+            }
             quickFilterBar
             courseTabs(for: menu)
             Divider().overlay(Theme.hairline)
