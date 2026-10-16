@@ -29,6 +29,8 @@ struct APIClient: Sendable {
 
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
+        // An Opus parse of a long menu over roaming data can outlast the 60 s default.
+        request.timeoutInterval = 120
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.httpBody = try JSONEncoder().encode(ParseMenuRequest(text: text, hints: hints))
 
