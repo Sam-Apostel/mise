@@ -10,9 +10,12 @@ public struct DishFilter: Codable, Hashable, Sendable {
     public var avoidAllergens: Set<Allergen>
     /// Maximum acceptable spice level (inclusive). `nil` means no spice constraint.
     public var maxSpice: SpiceLevel?
-    /// Ingredients the diner wants — a dish must contain at least one of these.
+    /// Ingredients the diner wants ("mozzarella", "bell pepper"). A dish with
+    /// none of them fails; one with only some passes and sorts after those with all.
+    /// Standard names or families (see `Dish.has(_:)`).
     public var preferredIngredients: Set<String>
-    /// Ingredients to avoid — a dish containing any of these fails.
+    /// Ingredients or families to avoid ("mushroom", "seafood", "coriander"):
+    /// a dish containing any of these fails.
     public var avoidedIngredients: Set<String>
     /// When non-empty, only these courses pass.
     public var courses: Set<Course>
@@ -58,15 +61,8 @@ public struct DishFilter: Codable, Hashable, Sendable {
         if !courses.isEmpty, !courses.contains(dish.course) { return false }
         if let maxPrice, let price = dish.price, price > maxPrice { return false }
 
-        let dishIngredients = Set(dish.ingredients.map { $0.lowercased() })
-        if !preferredIngredients.isEmpty {
-            let wanted = Set(preferredIngredients.map { $0.lowercased() })
-            if dishIngredients.isDisjoint(with: wanted) { return false }
-        }
-        if !avoidedIngredients.isEmpty {
-            let avoided = Set(avoidedIngredients.map { $0.lowercased() })
-            if !dishIngredients.isDisjoint(with: avoided) { return false }
-        }
+        if !preferredIngredients.isEmpty, !preferredIngredients.contains(where: dish.has) { return false }
+        if avoidedIngredients.contains(where: { dish.contains(avoid: $0) }) { return false }
 
         let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
         if !query.isEmpty {
@@ -76,6 +72,11 @@ public struct DishFilter: Codable, Hashable, Sendable {
             if !haystack.contains(query) { return false }
         }
         return true
+    }
+
+    /// The wanted ingredients `dish` lacks, in a stable order.
+    public func missingWanted(in dish: Dish) -> [String] {
+        preferredIngredients.sorted().filter { !dish.has($0) }
     }
 
     public func apply(to dishes: [Dish]) -> [Dish] {

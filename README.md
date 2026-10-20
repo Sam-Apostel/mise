@@ -33,7 +33,7 @@ dietary filters and (eventually) images of each dish.
 | Path        | What it is |
 |-------------|------------|
 | `Shared/`   | `MiseShared` SwiftPM package — DTOs (`Dish`, `ParsedMenu`, `DietaryTag`) and `DishFilter` logic, shared by app + server. |
-| `server/`   | Vapor backend. `/health` and `POST /v1/menu/parse`. Dockerised for Railway. |
+| `server/`   | Vapor backend. `/health`, `POST /v1/menu/parse`, `/v1/images` (dish photos), `/v1/phrases` and `/v1/filters/interpret` (a sentence → filters). Dockerised for Railway. |
 | `app/`      | SwiftUI iOS app. Xcode project is generated from `app/project.yml` via XcodeGen. |
 | `railway.json` | Railway build/deploy config (Dockerfile builder, healthcheck). |
 | `Makefile`  | Common build/test/run/deploy tasks — run `make help`. |

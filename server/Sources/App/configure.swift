@@ -25,6 +25,7 @@ public func configure(_ app: Application) async throws {
     )
 
     app.phraseService = PhraseService(apiKey: app.menuParser.apiKey, model: app.menuParser.model)
+    app.filterInterpreter = FilterInterpreter(apiKey: app.menuParser.apiKey, model: app.menuParser.model)
 
     try routes(app)
 }

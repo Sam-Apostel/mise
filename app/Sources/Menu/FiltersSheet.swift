@@ -6,6 +6,7 @@ struct FiltersSheet: View {
     @Environment(AppModel.self) private var model
     @Environment(\.dismiss) private var dismiss
     @State private var newAvoid = ""
+    @State private var allIngredients = false
 
     private let moods: [DietaryTag] = [.vegetarian, .vegan, .pescatarian, .halal, .glutenFree, .dairyFree]
 
@@ -41,6 +42,7 @@ struct FiltersSheet: View {
                             }
                         }
                     }
+                    onThisMenu
                     group("Spice, up to") {
                         SpiceSegments(firstTitle: "Any", level: $model.filter.maxSpice)
                     }
@@ -52,7 +54,7 @@ struct FiltersSheet: View {
                     }
                     .frame(minHeight: 44)
                     group("Also avoid") { avoidField }
-                    group("Courses", detail: model.hiddenSections.isEmpty ? "all on" : nil) {
+                    group("Courses", detail: model.hiddenSections.isEmpty ? "all on · hold one for only" : "hold one for only") {
                         FlowLayout(spacing: 8) {
                             ForEach(model.menu?.sections.map(\.title) ?? [], id: \.self) { title in
                                 // Outlined when on, so "all on" doesn't paint the sheet green.
@@ -64,6 +66,14 @@ struct FiltersSheet: View {
                                 }
                                 .opacity(off ? 0.4 : 1)
                                 .accessibilityValue(off ? "off" : "on")
+                                .contextMenu {
+                                    Button("Only \(title)", systemImage: "line.3.horizontal.decrease") {
+                                        withAnimation(.snappy) { model.showOnly(title) }
+                                    }
+                                }
+                                .accessibilityAction(named: "Only \(title)") {
+                                    withAnimation(.snappy) { model.showOnly(title) }
+                                }
                             }
                         }
                     }
@@ -98,6 +108,54 @@ struct FiltersSheet: View {
         }
     }
 
+    /// The menu's own ingredients and families as chips: tap once to want, again to avoid.
+    @ViewBuilder
+    private var onThisMenu: some View {
+        let index = model.ingredientIndex
+        let familyNames = Set(IngredientFamily.allCases.map(\.rawValue))
+        let ingredients = index.ingredients.filter { !familyNames.contains($0.key.name) }
+        let shown = allIngredients ? ingredients : Array(ingredients.prefix(16))
+        let listed = Set(shown.map(\.key.name) + index.families.map(\.family.rawValue))
+        // Wants and avoids from a sentence or the field that have no chip yet.
+        let extra = model.filter.preferredIngredients.union(model.filter.avoidedIngredients)
+            .subtracting(listed).sorted()
+        if !ingredients.isEmpty || !index.families.isEmpty || !extra.isEmpty {
+            group("On this menu", detail: "tap to want · again to avoid") {
+                FlowLayout(spacing: 8) {
+                    ForEach(index.families, id: \.family) { item in
+                        ingredientChip(item.family.rawValue, title: item.family.displayName, count: item.count)
+                    }
+                    ForEach(shown, id: \.key) { item in
+                        ingredientChip(item.key.name, title: item.key.name.capitalizedFirst, count: item.count)
+                    }
+                    ForEach(extra, id: \.self) { item in
+                        ingredientChip(item, title: (IngredientFamily(rawValue: item)?.displayName ?? item).capitalizedFirst,
+                                       count: nil)
+                    }
+                    if ingredients.count > 16 {
+                        Button(allIngredients ? "Fewer" : "All \(ingredients.count)") {
+                            withAnimation(.snappy) { allIngredients.toggle() }
+                        }
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundStyle(Board.paint)
+                        .frame(height: 40)
+                    }
+                }
+            }
+        }
+    }
+
+    private func ingredientChip(_ item: String, title: String, count: Int?) -> some View {
+        let wanted = model.filter.preferredIngredients.contains(item)
+        let avoided = model.filter.avoidedIngredients.contains(item)
+        return CreamChip(title: title, detail: count.map(String.init), isOn: wanted || avoided,
+                         onColor: avoided ? Board.noDeep : Board.paint, showsCheck: true,
+                         icon: avoided ? "minus" : "plus") {
+            withAnimation(.snappy) { model.cycle(item) }
+        }
+        .accessibilityValue(wanted ? "wanted" : avoided ? "avoided" : "")
+    }
+
     private var priceGroup: some View {
         let prices = (model.menu?.dishes ?? []).compactMap(\.price)
         let maxPrice = prices.max() ?? 0
@@ -126,7 +184,8 @@ struct FiltersSheet: View {
                 Button {
                     withAnimation(.snappy) { _ = model.filter.avoidedIngredients.remove(item) }
                 } label: {
-                    Text("\(item) ×").font(.system(size: 15, weight: .semibold))
+                    Text("\((IngredientFamily(rawValue: item)?.displayName.lowercased() ?? item)) ×")
+                        .font(.system(size: 15, weight: .semibold))
                         .padding(.horizontal, 10).frame(height: 32)
                         .overlay { Capsule().strokeBorder(Board.onRaised.opacity(0.22), lineWidth: 1.5) }
                 }

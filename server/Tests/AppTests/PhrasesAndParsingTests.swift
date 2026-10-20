@@ -86,6 +86,9 @@ struct PhrasesAndParsingTests {
             "protein": "Dried shrimp",
             "spiceLevel": "hot",
             "ingredients": ["green papaya", "lime"],
+            "ingredientKeys": [{"name": "Green Papaya", "family": "vegetable"}, {"name": "dried shrimp", "family": "seafood"},
+                               {"name": " ", "family": "other"}, {"name": "lime", "family": "citrus"}],
+            "kind": "Salad",
             "isPopular": true,
             "plate": "salad",
             "confidence": 0.9
@@ -121,12 +124,18 @@ struct PhrasesAndParsingTests {
         #expect(dish.spiceLevel == .hot)
         #expect(dish.plate == .salad)
         #expect(dish.isPopular)
+        #expect(dish.kind == "salad")
+        #expect(dish.ingredientKeys == [IngredientKey(name: "green papaya", family: .vegetable),
+                                        IngredientKey(name: "dried shrimp", family: .seafood),
+                                        IngredientKey(name: "lime", family: .other)])
+        #expect(dish.has("seafood"))
 
         let mystery = menu.dishes[1]
         #expect(mystery.plate == .generic)
         #expect(mystery.description == nil)
         #expect(mystery.menuNumber == nil)
         #expect(mystery.sectionTitle == "Mains")
+        #expect(mystery.kind == nil && mystery.ingredientKeys.isEmpty)
     }
 
     @Test("The schema requires every new field")
@@ -134,7 +143,7 @@ struct PhrasesAndParsingTests {
         let data = try JSONEncoder().encode(AnthropicMenuParser.schema)
         let text = String(decoding: data, as: UTF8.self)
         for field in ["menuNumber", "section", "allergenSources", "likelyIngredients", "protein", "plate",
-                      "originalRestaurantName", "cuisine", "questionTranslation"] {
+                      "originalRestaurantName", "cuisine", "questionTranslation", "kind", "ingredientKeys"] {
             #expect(text.contains("\"\(field)\""), "missing \(field)")
         }
     }

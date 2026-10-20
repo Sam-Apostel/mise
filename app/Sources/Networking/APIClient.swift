@@ -39,16 +39,16 @@ struct APIClient: Sendable {
         do { return try JSONDecoder().decode(Response.self, from: data) } catch { throw APIError.decoding(error) }
     }
 
-    /// Typical photos for a batch of dishes from the server's free image chain.
+    /// Typical photos for one batch of dishes (the server caps a batch at 60)
+    /// from the server's free image chain.
     func dishImages(_ queries: [DishImageQuery]) async throws -> [DishImageResult] {
-        var results: [DishImageResult] = []
-        // The server caps a batch at 60.
-        for start in stride(from: 0, to: queries.count, by: 60) {
-            let batch = Array(queries[start..<min(start + 60, queries.count)])
-            let response: DishImagesResponse = try await post("images", body: DishImagesRequest(dishes: batch), timeout: 45)
-            results += response.results
-        }
-        return results
+        let response: DishImagesResponse = try await post("images", body: DishImagesRequest(dishes: queries), timeout: 45)
+        return response.results
+    }
+
+    /// "Only pizzas, no mushrooms" → filters, read by the server's model against this menu.
+    func interpretFilters(_ request: InterpretFiltersRequest) async throws -> FilterIntent {
+        try await post("filters/interpret", body: request, timeout: 25)
     }
 
     /// Waiter-card phrases for a language the app does not carry offline.

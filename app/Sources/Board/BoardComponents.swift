@@ -219,13 +219,15 @@ struct CreamChip: View {
     let isOn: Bool
     var onColor: Color = Board.paint
     var showsCheck = false
+    /// Replaces the checkmark when on ("plus" for wanted, "minus" for avoided).
+    var icon = "checkmark"
     let action: () -> Void
 
     var body: some View {
         Button(action: action) {
             HStack(spacing: 8) {
                 if isOn && showsCheck {
-                    Image(systemName: "checkmark").font(.system(size: 13, weight: .bold))
+                    Image(systemName: icon).font(.system(size: 13, weight: .bold))
                 }
                 Text(title).font(.system(size: 15, weight: .semibold))
                 if let detail {

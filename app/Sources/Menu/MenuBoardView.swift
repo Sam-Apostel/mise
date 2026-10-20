@@ -151,8 +151,8 @@ struct MenuBoardView: View {
                     sheet = .people(Profile(name: ""))
                 }
                 .accessibilityLabel("Add a person")
-                if !model.filter.requiredTags.isEmpty {
-                    filterPill
+                ForEach(activeFilters) { pill in
+                    filterPill(pill)
                 }
             }
             .padding(.horizontal, Board.margin)
@@ -160,15 +160,54 @@ struct MenuBoardView: View {
         .scrollIndicators(.hidden)
     }
 
-    /// "Vegetarian tonight ×": a dark pill, so cream fill keeps meaning "selected person".
-    private var filterPill: some View {
-        let names = model.filter.requiredTags.map(\.displayName).sorted().joined(separator: ", ")
-        return Button {
-            withAnimation(.smooth) { model.filter.requiredTags = [] }
+    struct FilterPill: Identifiable {
+        let id: String
+        let title: String
+        var icon = "line.3.horizontal.decrease"
+        let remove: @MainActor () -> Void
+    }
+
+    /// Tonight's filters as pills, each removable on its own:
+    /// "Vegetarian tonight", "Pizzas only", "+ mozzarella", "− seafood".
+    private var activeFilters: [FilterPill] {
+        var pills: [FilterPill] = []
+        let f = model.filter
+        if !f.requiredTags.isEmpty {
+            let names = f.requiredTags.map(\.displayName).sorted().joined(separator: ", ")
+            pills.append(FilterPill(id: "tags", title: "\(names) tonight") { model.filter.requiredTags = [] })
+        }
+        if !model.hiddenSections.isEmpty, let menu = model.menu {
+            let shown = menu.sections.map(\.title).filter { !model.hiddenSections.contains($0) }
+            let title = shown.count <= model.hiddenSections.count && !shown.isEmpty
+                ? "\(shown.joined(separator: ", ")) only"
+                : "No \(model.hiddenSections.sorted().joined(separator: ", ").lowercased())"
+            pills.append(FilterPill(id: "sections", title: title) { model.hiddenSections = [] })
+        }
+        for item in f.preferredIngredients.sorted() {
+            pills.append(FilterPill(id: "want-\(item)", title: label(item), icon: "plus") {
+                model.filter.preferredIngredients.remove(item)
+            })
+        }
+        for item in f.avoidedIngredients.sorted() {
+            pills.append(FilterPill(id: "avoid-\(item)", title: label(item), icon: "minus") {
+                model.filter.avoidedIngredients.remove(item)
+            })
+        }
+        return pills
+    }
+
+    private func label(_ item: String) -> String {
+        IngredientFamily(rawValue: item)?.displayName.lowercased() ?? item
+    }
+
+    /// A dark pill, so cream fill keeps meaning "selected person".
+    private func filterPill(_ pill: FilterPill) -> some View {
+        Button {
+            withAnimation(.smooth) { pill.remove() }
         } label: {
             HStack(spacing: 6) {
-                Image(systemName: "line.3.horizontal.decrease").font(.system(size: 13, weight: .semibold))
-                Text("\(names) tonight").font(.system(size: 13, weight: .semibold))
+                Image(systemName: pill.icon).font(.system(size: 13, weight: .semibold))
+                Text(pill.title).font(.system(size: 13, weight: .semibold))
                 Image(systemName: "xmark").font(.system(size: 10, weight: .bold))
             }
             .foregroundStyle(Board.ink)
@@ -179,7 +218,7 @@ struct MenuBoardView: View {
         }
         .buttonStyle(PressStyle())
         .padding(.leading, 4)
-        .accessibilityLabel("Remove \(names) filter")
+        .accessibilityLabel("Remove \(pill.title)")
     }
 
     // MARK: Summary bar
@@ -360,9 +399,10 @@ struct MenuBoardView: View {
             if searching {
                 HStack(spacing: 8) {
                     Image(systemName: "magnifyingglass")
-                    TextField("Say or type a dish", text: $model.searchText)
+                    TextField("A dish, or “only pizza, no mushrooms”", text: $model.searchText)
                         .focused($searchFocused)
                         .submitLabel(.search)
+                        .onSubmit { interpretSearch() }
                 }
                 .font(.system(size: 17))
                 .foregroundStyle(Board.ground)
@@ -387,8 +427,24 @@ struct MenuBoardView: View {
     private var filtersTitle: String {
         let f = model.filter
         let n = f.requiredTags.count + (f.maxSpice == nil ? 0 : 1) + (f.maxPrice == nil ? 0 : 1)
-            + f.avoidedIngredients.count + model.hiddenSections.count + (model.hideCrossed ? 1 : 0)
+            + f.preferredIngredients.count + f.avoidedIngredients.count + model.hiddenSections.count
+            + (model.hideCrossed ? 1 : 0)
         return n == 0 ? "Filters" : "Filters · \(n)"
+    }
+
+    /// Return in the search field: a sentence that reads as filters becomes pills
+    /// and the search closes; anything else stays a search.
+    private func interpretSearch() {
+        let text = model.searchText.trimmingCharacters(in: .whitespaces)
+        guard !text.isEmpty else { return }
+        Task {
+            let applied = await model.interpret(text)
+            guard applied else { return }
+            withAnimation(.snappy) {
+                model.searchText = ""
+                searching = false
+            }
+        }
     }
 
     // MARK: The chalk strike

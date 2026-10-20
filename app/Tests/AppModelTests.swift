@@ -54,4 +54,32 @@ final class AppModelTests: XCTestCase {
         XCTAssertEqual(set.allergy.first, "แพ้ถั่วลิสง กุ้ง และปู")
         XCTAssertEqual(set.order, "ขอสั่ง")
     }
+
+    func testSentenceBecomesFiltersAndWantedDishesComeFirst() {
+        let model = AppModel(store: .none)
+        model.open(ParsedMenu(dishes: [
+            Dish(name: "Marinara", section: "Pizzas", ingredients: ["pomodoro", "aglio"]),
+            Dish(name: "Margherita", section: "Pizzas", ingredients: ["pomodoro", "mozzarella"]),
+            Dish(name: "Ortolana", section: "Pizzas", ingredients: ["mozzarella", "peperoni"]),
+            Dish(name: "Boscaiola", section: "Pizzas", ingredients: ["mozzarella", "funghi", "peperoni"]),
+            Dish(name: "Tiramisù", section: "Desserts", ingredients: ["mascarpone"]),
+        ]))
+        model.apply(FilterIntentParser.parse("only pizzas with mozzarella and bell pepper, no mushrooms",
+                                             sections: ["Pizzas", "Desserts"]))
+        XCTAssertEqual(model.hiddenSections, ["Desserts"])
+        let names = model.sections(sortingFor: nil, sorted: true).flatMap(\.dishes).map(\.name)
+        XCTAssertEqual(names, ["Ortolana", "Margherita", "Marinara", "Boscaiola"])
+        XCTAssertEqual(model.verdict(for: model.menu!.dishes[1], profile: nil).reason, "No bell pepper")
+    }
+
+    func testIngredientChipCyclesWantAvoidOff() {
+        let model = model()
+        model.cycle("tomato")
+        XCTAssertEqual(model.filter.preferredIngredients, ["tomato"])
+        model.cycle("tomato")
+        XCTAssertEqual(model.filter.avoidedIngredients, ["tomato"])
+        XCTAssertTrue(model.filter.preferredIngredients.isEmpty)
+        model.cycle("tomato")
+        XCTAssertFalse(model.filter.isActive)
+    }
 }
