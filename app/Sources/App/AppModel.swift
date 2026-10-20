@@ -49,6 +49,8 @@ final class AppModel {
 
     var picks: [PickLine] = []
     var recents: [ParsedMenu] = []
+    /// The diner's own photos of dishes they had, kept on the device.
+    var myPhotos: [MyDishPhoto] = [] { didSet { store.saveMyPhotos(myPhotos) } }
     var homeCurrency: String = Locale.current.currency?.identifier ?? "EUR"
 
     private let recognizer: VisionTextRecognizer
@@ -63,6 +65,7 @@ final class AppModel {
         self.store = store
         profiles = store.loadProfiles()
         recents = store.loadRecents()
+        myPhotos = store.loadMyPhotos()
     }
 
     var isWorking: Bool { phase == .recognizing || phase == .parsing }
@@ -309,6 +312,44 @@ final class AppModel {
     /// Switches every section off but `title`.
     func showOnly(_ title: String) {
         hiddenSections = Set((menu?.sections.map(\.title) ?? []).filter { $0 != title })
+    }
+
+    // MARK: My photos
+
+    /// The menu `dish` belongs to: the open one, else a recent one.
+    private func menu(containing dish: Dish) -> ParsedMenu? {
+        if let menu, menu.dishes.contains(where: { $0.id == dish.id }) { return menu }
+        return recents.first { $0.dishes.contains { $0.id == dish.id } }
+    }
+
+    /// The diner's own photo of `dish`, the newest when there are several:
+    /// from this menu, or from an earlier visit to the same restaurant.
+    func myPhoto(for dish: Dish) -> MyDishPhoto? {
+        guard let menu = menu(containing: dish) else { return nil }
+        return myPhotos.filter { $0.matches(dish, in: menu) }.max { $0.takenAt < $1.takenAt }
+    }
+
+    func url(for photo: MyDishPhoto) -> URL? { store.photoURL(photo.file) }
+
+    /// Saves a photo of `dish` (camera or library), replacing an earlier one for it.
+    @discardableResult
+    func saveMyPhoto(_ data: Data, for dish: Dish) async -> Bool {
+        guard let menu = menu(containing: dish) else { return false }
+        let store = self.store
+        let file = await Task.detached(priority: .userInitiated) { () -> String? in
+            MyDishPhoto.prepare(data).flatMap(store.writePhoto)
+        }.value
+        guard let file else { return false }
+        removeMyPhoto(for: dish)
+        myPhotos.append(MyDishPhoto(restaurant: MyDishPhoto.restaurantKey(for: menu), dish: MyDishPhoto.dishKey(for: dish),
+                                    menuID: menu.id, file: file, takenAt: .now))
+        return true
+    }
+
+    func removeMyPhoto(for dish: Dish) {
+        guard let menu = menu(containing: dish) else { return }
+        for photo in myPhotos where photo.matches(dish, in: menu) { store.deletePhoto(photo.file) }
+        myPhotos.removeAll { $0.matches(dish, in: menu) }
     }
 
     // MARK: Profiles

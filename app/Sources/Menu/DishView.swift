@@ -1,4 +1,5 @@
 import SwiftUI
+import PhotosUI
 import MiseShared
 
 /// One dish: the photo leads, then what it means for each person at the table,
@@ -10,6 +11,11 @@ struct DishView: View {
     let showPicks: () -> Void
     @State private var askingWaiter = false
     @State private var added = 0
+    @State private var choosingPhoto = false
+    @State private var takingPhoto = false
+    @State private var pickingPhoto = false
+    @State private var pickerItem: PhotosPickerItem?
+    @State private var savedPhoto = 0
 
     var body: some View {
         ZStack(alignment: .bottom) {
@@ -35,6 +41,34 @@ struct DishView: View {
         .toolbar(.hidden, for: .navigationBar)
         .fullScreenCover(isPresented: $askingWaiter) { WaiterCardView(mode: .ask(dish)) }
         .sensoryFeedback(.success, trigger: added)
+        .sensoryFeedback(.success, trigger: savedPhoto)
+        .confirmationDialog("Your photo of this dish", isPresented: $choosingPhoto, titleVisibility: .visible) {
+            if CameraPicker.isAvailable {
+                Button("Take a photo") { takingPhoto = true }
+            }
+            Button("Choose from library") { pickingPhoto = true }
+            if mine != nil {
+                Button("Remove your photo", role: .destructive) {
+                    withAnimation(.smooth) { model.removeMyPhoto(for: dish) }
+                }
+            }
+        } message: {
+            Text("Kept on this phone. It shows here next time you read this restaurant's menu.")
+        }
+        .photosPicker(isPresented: $pickingPhoto, selection: $pickerItem, matching: .images)
+        .onChange(of: pickerItem) { _, item in
+            guard let item else { return }
+            Task {
+                if let data = try? await item.loadTransferable(type: Data.self) { await save(data) }
+                pickerItem = nil
+            }
+        }
+    }
+
+    private var mine: MyDishPhoto? { model.myPhoto(for: dish) }
+
+    private func save(_ data: Data) async {
+        if await model.saveMyPhoto(data, for: dish) { savedPhoto += 1 }
     }
 
     // MARK: Hero
@@ -53,6 +87,19 @@ struct DishView: View {
                 NumberChip(text: chip, leading: 20)
                     .padding(.bottom, -1)
             }
+            .overlay(alignment: .bottomTrailing) {
+                GlassCircleButton(systemImage: mine == nil ? "camera" : "camera.fill",
+                                  label: mine == nil ? "Add your photo of this dish" : "Change your photo") {
+                    choosingPhoto = true
+                }
+                .padding(.trailing, 16)
+                .padding(.bottom, 12)
+            }
+            // On the hero, not the root, so it does not share a view with the waiter card's cover.
+            .fullScreenCover(isPresented: $takingPhoto) {
+                CameraPicker { data in Task { await save(data) } }
+                    .ignoresSafeArea()
+            }
     }
 
     private var chip: String {
@@ -62,7 +109,12 @@ struct DishView: View {
 
     private var titleBlock: some View {
         VStack(alignment: .leading, spacing: 0) {
-            if dish.imageURL != nil {
+            if let mine {
+                Text("Your photo, \(mine.takenAt.formatted(date: .abbreviated, time: .omitted)).")
+                    .font(.boardMeta).tracking(0.2)
+                    .foregroundStyle(Board.ink3)
+                    .padding(.bottom, 8)
+            } else if dish.imageURL != nil {
                 Text(["Typical photo, not this kitchen's.", dish.imageCredit.map { $0 + "." }]
                         .compactMap { $0 }.joined(separator: " "))
                     .font(.boardMeta).tracking(0.2)

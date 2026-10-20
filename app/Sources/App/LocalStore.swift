@@ -17,6 +17,32 @@ struct LocalStore: Sendable {
     func loadRecents() -> [ParsedMenu] { load("recents.json") ?? [] }
     func saveRecents(_ menus: [ParsedMenu]) { save(menus, to: "recents.json") }
 
+    func loadMyPhotos() -> [MyDishPhoto] { load("my-photos.json") ?? [] }
+    func saveMyPhotos(_ photos: [MyDishPhoto]) { save(photos, to: "my-photos.json") }
+
+    /// Where the diner's own dish photos live, one JPEG each.
+    var photosDirectory: URL? { directory?.appendingPathComponent("DishPhotos", isDirectory: true) }
+
+    func photoURL(_ file: String) -> URL? { photosDirectory?.appendingPathComponent(file) }
+
+    /// Writes a JPEG and returns its file name, or `nil` when nothing is stored.
+    func writePhoto(_ jpeg: Data) -> String? {
+        guard let folder = photosDirectory else { return nil }
+        try? FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+        let file = UUID().uuidString + ".jpg"
+        do {
+            try jpeg.write(to: folder.appendingPathComponent(file), options: .atomic)
+            return file
+        } catch {
+            return nil
+        }
+    }
+
+    func deletePhoto(_ file: String) {
+        guard let url = photoURL(file) else { return }
+        try? FileManager.default.removeItem(at: url)
+    }
+
     private func load<T: Decodable>(_ name: String) -> T? {
         guard let url = directory?.appendingPathComponent(name),
               let data = try? Data(contentsOf: url) else { return nil }
