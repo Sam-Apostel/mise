@@ -28,6 +28,9 @@ public struct Dish: Codable, Identifiable, Hashable, Sendable {
     /// The menu's own section heading, translated ("Salads and soups", "Primi").
     /// Dishes are grouped by this when present, in menu order.
     public var section: String?
+    /// The generic kind of dish in English, singular ("pizza", "pasta", "curry").
+    /// Narrows the photo search so "Allegra" finds a pizza, not a train.
+    public var kind: String?
     public var dietaryTags: [DietaryTag]
     /// Allergens the dish *contains*.
     public var allergens: [Allergen]
@@ -43,6 +46,10 @@ public struct Dish: Codable, Identifiable, Hashable, Sendable {
     public var spiceLevel: SpiceLevel
     /// Notable ingredients, used both for display and for richer filtering.
     public var ingredients: [String]
+    /// `ingredients` under standard English names with their family
+    /// ("funghi" → mushroom, mushroom). Empty for menus parsed before this
+    /// existed; `keys` then looks them up offline.
+    public var ingredientKeys: [IngredientKey]
     /// Whether the dish is a popular / frequently ordered item.
     public var isPopular: Bool
     /// A typical photo of the dish (not this kitchen's), from the free image chain.
@@ -66,6 +73,7 @@ public struct Dish: Codable, Identifiable, Hashable, Sendable {
         currency: String? = nil,
         course: Course = .other,
         section: String? = nil,
+        kind: String? = nil,
         dietaryTags: [DietaryTag] = [],
         allergens: [Allergen] = [],
         allergenSources: [AllergenSource] = [],
@@ -73,6 +81,7 @@ public struct Dish: Codable, Identifiable, Hashable, Sendable {
         protein: String? = nil,
         spiceLevel: SpiceLevel = .none,
         ingredients: [String] = [],
+        ingredientKeys: [IngredientKey] = [],
         isPopular: Bool = false,
         imageURL: URL? = nil,
         imageCredit: String? = nil,
@@ -90,6 +99,7 @@ public struct Dish: Codable, Identifiable, Hashable, Sendable {
         self.currency = currency
         self.course = course
         self.section = section
+        self.kind = kind
         self.dietaryTags = dietaryTags
         self.allergens = allergens
         self.allergenSources = allergenSources
@@ -97,6 +107,7 @@ public struct Dish: Codable, Identifiable, Hashable, Sendable {
         self.protein = protein
         self.spiceLevel = spiceLevel
         self.ingredients = ingredients
+        self.ingredientKeys = ingredientKeys
         self.isPopular = isPopular
         self.imageURL = imageURL
         self.imageCredit = imageCredit
@@ -106,8 +117,8 @@ public struct Dish: Codable, Identifiable, Hashable, Sendable {
 
     private enum CodingKeys: String, CodingKey {
         case id, name, originalName, originalText, description, originalDescription, menuNumber
-        case price, currency, course, section, dietaryTags, allergens, allergenSources
-        case likelyIngredients, protein, spiceLevel, ingredients, isPopular, imageURL
+        case price, currency, course, section, kind, dietaryTags, allergens, allergenSources
+        case likelyIngredients, protein, spiceLevel, ingredients, ingredientKeys, isPopular, imageURL
         case imageCredit, plate, confidence
     }
 
@@ -124,6 +135,7 @@ public struct Dish: Codable, Identifiable, Hashable, Sendable {
         currency = try c.decodeIfPresent(String.self, forKey: .currency)
         course = (try? c.decodeIfPresent(Course.self, forKey: .course)) ?? .other
         section = try c.decodeIfPresent(String.self, forKey: .section)
+        kind = try c.decodeIfPresent(String.self, forKey: .kind)
         dietaryTags = try c.decodeIfPresent([DietaryTag].self, forKey: .dietaryTags) ?? []
         allergens = try c.decodeIfPresent([Allergen].self, forKey: .allergens) ?? []
         allergenSources = try c.decodeIfPresent([AllergenSource].self, forKey: .allergenSources) ?? []
@@ -131,6 +143,7 @@ public struct Dish: Codable, Identifiable, Hashable, Sendable {
         protein = try c.decodeIfPresent(String.self, forKey: .protein)
         spiceLevel = (try? c.decodeIfPresent(SpiceLevel.self, forKey: .spiceLevel)) ?? .none
         ingredients = try c.decodeIfPresent([String].self, forKey: .ingredients) ?? []
+        ingredientKeys = try c.decodeIfPresent([IngredientKey].self, forKey: .ingredientKeys) ?? []
         isPopular = try c.decodeIfPresent(Bool.self, forKey: .isPopular) ?? false
         imageURL = try c.decodeIfPresent(URL.self, forKey: .imageURL)
         imageCredit = try c.decodeIfPresent(String.self, forKey: .imageCredit)

@@ -49,6 +49,8 @@ final class AppModel {
 
     var picks: [PickLine] = []
     var recents: [ParsedMenu] = []
+    /// The diner's own photos of dishes they had, kept on the device.
+    var myPhotos: [MyDishPhoto] = [] { didSet { store.saveMyPhotos(myPhotos) } }
     var homeCurrency: String = Locale.current.currency?.identifier ?? "EUR"
 
     private let recognizer: VisionTextRecognizer
@@ -63,6 +65,7 @@ final class AppModel {
         self.store = store
         profiles = store.loadProfiles()
         recents = store.loadRecents()
+        myPhotos = store.loadMyPhotos()
     }
 
     var isWorking: Bool { phase == .recognizing || phase == .parsing }
@@ -137,6 +140,9 @@ final class AppModel {
         await rate
     }
 
+    /// Dishes per photo request: small, so photos land a batch at a time.
+    static let imageBatch = 8
+
     private func loadImages(for current: ParsedMenu) async {
         let missing = current.dishes.filter { $0.imageURL == nil }
         guard !missing.isEmpty else { imagePhase = .done; return }
@@ -147,23 +153,40 @@ final class AppModel {
             if !Task.isCancelled, self?.imagePhase == .loading { self?.imagePhase = .slow }
         }
         defer { slowTimer.cancel() }
-        do {
-            let queries = missing.map {
-                DishImageQuery(id: $0.id, name: $0.name, originalName: $0.originalName, cuisine: current.cuisine)
-            }
-            let results = try await api.dishImages(queries)
-            guard menu?.id == current.id else { return }
-            for result in results {
-                guard let image = result.image,
-                      let index = menu?.dishes.firstIndex(where: { $0.id == result.id }) else { continue }
-                menu?.dishes[index].imageURL = image.url
-                menu?.dishes[index].imageCredit = image.credit
-            }
-            imagePhase = .done
-            if let menu { remember(menu) }
-        } catch {
-            if menu?.id == current.id { imagePhase = .failed }
+        var queries = missing.map {
+            DishImageQuery(id: $0.id, name: $0.name, originalName: $0.originalName, cuisine: current.cuisine,
+                           kind: $0.kind, section: $0.section)
         }
+        var answered = false
+        // A dish the server could not look up this time (a source was rate-limited
+        // or slow) gets one more try once the rest have landed.
+        for round in 0..<2 {
+            var retry: [DishImageQuery] = []
+            for start in stride(from: 0, to: queries.count, by: Self.imageBatch) {
+                let batch = Array(queries[start..<min(start + Self.imageBatch, queries.count)])
+                guard let results = try? await api.dishImages(batch) else {
+                    retry += batch
+                    continue
+                }
+                guard menu?.id == current.id else { return }
+                answered = true
+                // Photos are arriving, so the weak-signal strip has nothing to say.
+                if imagePhase == .slow { imagePhase = .loading }
+                for result in results {
+                    if result.retry { retry += batch.filter { $0.id == result.id } }
+                    guard let image = result.image,
+                          let index = menu?.dishes.firstIndex(where: { $0.id == result.id }) else { continue }
+                    menu?.dishes[index].imageURL = image.url
+                    menu?.dishes[index].imageCredit = image.credit
+                }
+            }
+            if let menu, menu.id == current.id { remember(menu) }
+            guard round == 0, !retry.isEmpty else { break }
+            queries = retry
+            try? await Task.sleep(for: .seconds(20))
+            guard menu?.id == current.id else { return }
+        }
+        imagePhase = answered ? .done : .failed
     }
 
     private func loadRate(for current: ParsedMenu) async {
@@ -230,8 +253,103 @@ final class AppModel {
             if let verdictFocus {
                 dishes = dishes.filter { verdict(for: $0, profile: profile).kind == verdictFocus }
             }
+            if sorted, !filter.preferredIngredients.isEmpty {
+                // Within each verdict, dishes with everything wanted come first.
+                dishes = dishes.enumerated().sorted { a, b in
+                    let ka = verdict(for: a.element, profile: profile).kind
+                    let kb = verdict(for: b.element, profile: profile).kind
+                    guard ka == kb else { return ka < kb }
+                    let ma = filter.missingWanted(in: a.element).count
+                    let mb = filter.missingWanted(in: b.element).count
+                    return ma == mb ? a.offset < b.offset : ma < mb
+                }.map(\.element)
+            }
             return dishes.isEmpty ? nil : (section.title, dishes)
         }
+    }
+
+    // MARK: Filters from a sentence
+
+    /// The ingredients and families on the sections that are switched on.
+    var ingredientIndex: IngredientIndex { IngredientIndex(dishes: visibleDishes) }
+
+    /// Reads "only pizzas with mozzarella, no mushrooms" into tonight's filters.
+    /// Returns `false` when the sentence is not a filter, so the caller keeps it as a search.
+    @discardableResult
+    func interpret(_ text: String) async -> Bool {
+        guard let current = menu else { return false }
+        let sections = current.sections.map(\.title)
+        let ingredients = IngredientIndex(dishes: current.dishes).ingredients.map(\.key.name)
+        let request = InterpretFiltersRequest(text: text, sections: sections, ingredients: ingredients)
+        let intent: FilterIntent
+        if let remote = try? await api.interpretFilters(request) {
+            intent = remote
+        } else {
+            intent = FilterIntentParser.parse(text, sections: sections, ingredients: ingredients)
+        }
+        guard menu?.id == current.id, !intent.isEmpty else { return false }
+        apply(intent)
+        return true
+    }
+
+    func apply(_ intent: FilterIntent) {
+        intent.apply(to: &filter, hiddenSections: &hiddenSections, allSections: menu?.sections.map(\.title) ?? [])
+        verdictFocus = nil
+    }
+
+    /// Neutral → want → avoid → neutral, for an "On this menu" chip.
+    func cycle(_ item: String) {
+        if filter.preferredIngredients.contains(item) {
+            filter.preferredIngredients.remove(item)
+            filter.avoidedIngredients.insert(item)
+        } else if filter.avoidedIngredients.contains(item) {
+            filter.avoidedIngredients.remove(item)
+        } else {
+            filter.preferredIngredients.insert(item)
+        }
+    }
+
+    /// Switches every section off but `title`.
+    func showOnly(_ title: String) {
+        hiddenSections = Set((menu?.sections.map(\.title) ?? []).filter { $0 != title })
+    }
+
+    // MARK: My photos
+
+    /// The menu `dish` belongs to: the open one, else a recent one.
+    private func menu(containing dish: Dish) -> ParsedMenu? {
+        if let menu, menu.dishes.contains(where: { $0.id == dish.id }) { return menu }
+        return recents.first { $0.dishes.contains { $0.id == dish.id } }
+    }
+
+    /// The diner's own photo of `dish`, the newest when there are several:
+    /// from this menu, or from an earlier visit to the same restaurant.
+    func myPhoto(for dish: Dish) -> MyDishPhoto? {
+        guard let menu = menu(containing: dish) else { return nil }
+        return myPhotos.filter { $0.matches(dish, in: menu) }.max { $0.takenAt < $1.takenAt }
+    }
+
+    func url(for photo: MyDishPhoto) -> URL? { store.photoURL(photo.file) }
+
+    /// Saves a photo of `dish` (camera or library), replacing an earlier one for it.
+    @discardableResult
+    func saveMyPhoto(_ data: Data, for dish: Dish) async -> Bool {
+        guard let menu = menu(containing: dish) else { return false }
+        let store = self.store
+        let file = await Task.detached(priority: .userInitiated) { () -> String? in
+            MyDishPhoto.prepare(data).flatMap(store.writePhoto)
+        }.value
+        guard let file else { return false }
+        removeMyPhoto(for: dish)
+        myPhotos.append(MyDishPhoto(restaurant: MyDishPhoto.restaurantKey(for: menu), dish: MyDishPhoto.dishKey(for: dish),
+                                    menuID: menu.id, file: file, takenAt: .now))
+        return true
+    }
+
+    func removeMyPhoto(for dish: Dish) {
+        guard let menu = menu(containing: dish) else { return }
+        for photo in myPhotos where photo.matches(dish, in: menu) { store.deletePhoto(photo.file) }
+        myPhotos.removeAll { $0.matches(dish, in: menu) }
     }
 
     // MARK: Profiles

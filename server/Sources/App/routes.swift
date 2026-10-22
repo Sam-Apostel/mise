@@ -10,6 +10,7 @@ func routes(_ app: Application) throws {
     try v1.register(collection: MenuController())
     try v1.register(collection: ImageController())
     try v1.register(collection: PhraseController())
+    try v1.register(collection: FilterController())
 }
 
 struct HealthResponse: Content {

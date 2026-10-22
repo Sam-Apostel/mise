@@ -10,3 +10,5 @@ extension DishImagesRequest: @retroactive Content {}
 extension DishImagesResponse: @retroactive Content {}
 extension PhrasesRequest: @retroactive Content {}
 extension PhraseSet: @retroactive Content {}
+extension InterpretFiltersRequest: @retroactive Content {}
+extension FilterIntent: @retroactive Content {}

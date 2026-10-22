@@ -91,7 +91,14 @@ struct DishTile: View {
                 .lineLimit(2)
                 .transition(.opacity)
         case .fine:
-            if showsDescription, let description = dish.description {
+            if case .wanted(let missing)? = reason.cause, let note = reason.reason {
+                // "No bell pepper" in amber; "Bell pepper and mozzarella" when it has them all.
+                Text(note)
+                    .font(.system(size: 15, weight: .semibold)).tracking(-0.2)
+                    .foregroundStyle(missing.isEmpty ? Board.ink2 : Board.ask)
+                    .lineLimit(2)
+                    .transition(.opacity)
+            } else if showsDescription, let description = dish.description {
                 Text(description)
                     .font(.boardSecondary).tracking(-0.2)
                     .foregroundStyle(Board.ink3)

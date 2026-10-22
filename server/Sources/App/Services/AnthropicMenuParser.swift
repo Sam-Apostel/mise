@@ -53,6 +53,9 @@ struct AnthropicMenuParser {
         - `menuNumber`: the menu's own number for the dish exactly as printed ("07", "A3"), else null.
         - `section`: the menu's own section heading for this dish, translated into "\(language)" \
         ("Salads and soups", "First courses"), else null.
+        - `kind`: the generic kind of dish in English, singular, one or two words ("pizza", "pasta", \
+        "curry", "salad", "sandwich", "soup", "cake"), so a photo search can check it found the right \
+        thing. Null for drinks or when unclear.
         - `course`: one of \(Course.allCases.map(\.rawValue).joined(separator: ", ")).
         - `dietaryTags`: ONLY from \(DietaryTag.allCases.map(\.rawValue).joined(separator: ", ")).
         - `allergens`: allergens the dish CONTAINS based on its listed or defining ingredients, ONLY from \
@@ -70,6 +73,11 @@ struct AnthropicMenuParser {
         or null when there is none.
         - `spiceLevel`: one of \(SpiceLevel.allCases.map(\.rawValue).joined(separator: ", ")).
         - `ingredients`: notable ingredients (lowercase, in "\(language)").
+        - `ingredientKeys`: the same ingredients, plus the protein, under one standard lowercase singular \
+        ENGLISH name each, whatever the menu's language ("funghi" → "mushroom", "peperoni" → \
+        "bell pepper", "fior di latte" → "mozzarella", "gamberi" → "prawn", "salame piccante" → \
+        "salami"), with its `family`, one of \(IngredientFamily.allCases.map(\.rawValue).joined(separator: ", ")). \
+        Use the same name for the same ingredient across all dishes, so diners can filter by it.
         - `isPopular`: true only if the menu marks it as a house special / popular / chef's choice.
         - `price`/`currency`: when present (ISO 4217 code).
         - `plate`: the closest drawn plate for the dish, one of \
@@ -97,6 +105,10 @@ struct AnthropicMenuParser {
             ],
             required: ["name", "allergens", "breaks", "question", "questionTranslation", "note"]
         )
+        let ingredientKey = JSONValue.schemaObject(
+            properties: ["name": .stringType, "family": .stringEnum(IngredientFamily.allCases.map(\.rawValue))],
+            required: ["name", "family"]
+        )
         let dish = JSONValue.schemaObject(
             properties: [
                 "name": .stringType,
@@ -107,6 +119,7 @@ struct AnthropicMenuParser {
                 "section": .nullableString,
                 "price": .object(["type": .array([.string("number"), .string("null")])]),
                 "currency": .nullableString,
+                "kind": .nullableString,
                 "course": .stringEnum(Course.allCases.map(\.rawValue)),
                 "dietaryTags": .arrayOf(tagEnum),
                 "allergens": .arrayOf(allergenEnum),
@@ -115,14 +128,15 @@ struct AnthropicMenuParser {
                 "protein": .nullableString,
                 "spiceLevel": .stringEnum(SpiceLevel.allCases.map(\.rawValue)),
                 "ingredients": .arrayOf(.stringType),
+                "ingredientKeys": .arrayOf(ingredientKey),
                 "isPopular": .object(["type": .string("boolean")]),
                 "plate": .stringEnum(PlateArchetype.allCases.map(\.rawValue)),
                 "confidence": .object(["type": .string("number")]),
             ],
             required: ["name", "originalName", "description", "originalDescription", "menuNumber",
-                       "section", "price", "currency", "course", "dietaryTags", "allergens",
+                       "section", "price", "currency", "kind", "course", "dietaryTags", "allergens",
                        "allergenSources", "likelyIngredients", "protein", "spiceLevel",
-                       "ingredients", "isPopular", "plate", "confidence"]
+                       "ingredients", "ingredientKeys", "isPopular", "plate", "confidence"]
         )
         return .schemaObject(
             properties: [
@@ -168,6 +182,11 @@ struct LLMDish: Codable {
         var ingredient: String
     }
 
+    struct Key: Codable {
+        var name: String
+        var family: String?
+    }
+
     struct Likely: Codable {
         var name: String
         var allergens: [String]?
@@ -185,6 +204,7 @@ struct LLMDish: Codable {
     var section: String?
     var price: Double?
     var currency: String?
+    var kind: String?
     var course: String?
     var dietaryTags: [String]?
     var allergens: [String]?
@@ -193,6 +213,7 @@ struct LLMDish: Codable {
     var protein: String?
     var spiceLevel: String?
     var ingredients: [String]?
+    var ingredientKeys: [Key]?
     var isPopular: Bool?
     var plate: String?
     var confidence: Double?
@@ -208,6 +229,7 @@ struct LLMDish: Codable {
             currency: currency ?? defaultCurrency,
             course: course.flatMap(Course.init(rawValue:)) ?? .other,
             section: section.nonEmpty,
+            kind: kind.nonEmpty?.lowercased(),
             dietaryTags: (dietaryTags ?? []).compactMap(DietaryTag.init(rawValue:)),
             allergens: (allergens ?? []).compactMap(Allergen.init(rawValue:)),
             allergenSources: (allergenSources ?? []).compactMap { source in
@@ -228,6 +250,12 @@ struct LLMDish: Codable {
             protein: protein.nonEmpty,
             spiceLevel: spiceLevel.flatMap(SpiceLevel.init(rawValue:)) ?? .none,
             ingredients: ingredients ?? [],
+            ingredientKeys: (ingredientKeys ?? []).compactMap { key in
+                Optional(key.name).nonEmpty.map {
+                    IngredientKey(name: $0.lowercased(),
+                                  family: key.family.flatMap(IngredientFamily.init(rawValue:)) ?? .other)
+                }
+            },
             isPopular: isPopular ?? false,
             plate: plate.flatMap(PlateArchetype.init(rawValue:)) ?? .generic,
             confidence: confidence ?? 0.7

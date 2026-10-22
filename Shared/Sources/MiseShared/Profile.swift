@@ -65,6 +65,8 @@ public struct Verdict: Hashable, Sendable {
         case spice(dish: SpiceLevel, max: SpiceLevel)
         case filter
         case likely(LikelyIngredient)
+        /// Fine, with a note on the wanted ingredients it lacks (none when it has them all).
+        case wanted(missing: [String])
     }
 
     public var kind: Kind
@@ -117,6 +119,13 @@ public struct Verdict: Hashable, Sendable {
                 return Verdict(kind: .ask, reason: line, cause: .likely(likely))
             }
         }
+        if !filter.preferredIngredients.isEmpty {
+            let missing = filter.missingWanted(in: dish)
+            let reason = missing.isEmpty
+                ? listSentence(filter.preferredIngredients.sorted().map(displayIngredient))
+                : "No " + listSentence(missing.map(displayIngredient)).lowercased()
+            return Verdict(kind: .fine, reason: reason, cause: .wanted(missing: missing))
+        }
         return .fine
     }
 }
@@ -131,8 +140,7 @@ extension Dish {
         case "alcohol": if dietaryTags.contains(.containsAlcohol) { return true }
         default: break
         }
-        let haystack = ([protein ?? ""] + ingredients).map { $0.lowercased() }
-        return haystack.contains { $0.contains(word) }
+        return has(word)
     }
 }
 
@@ -152,9 +160,19 @@ extension DishFilter {
         if let maxSpice, dish.spiceLevel > maxSpice { return dish.spiceLevel.displayName }
         if let maxPrice, let price = dish.price, price > maxPrice { return "Over budget" }
         let avoided = avoidedIngredients.filter { dish.contains(avoid: $0) }
-        if !avoided.isEmpty { return listSentence(Array(avoided).sorted()) }
+        if !avoided.isEmpty { return "Has " + listSentence(avoided.sorted().map(displayIngredient)).lowercased() }
+        if !preferredIngredients.isEmpty, !preferredIngredients.contains(where: dish.has) {
+            let words = preferredIngredients.sorted().map(displayIngredient)
+            let list = words.count > 1 ? words.dropLast().joined(separator: ", ") + " or " + words.last! : words[0]
+            return "No " + list
+        }
         return "Filtered out"
     }
+}
+
+/// "seafood" → "seafood", "mushroom" → "mushrooms": a family reads as its chip does.
+func displayIngredient(_ item: String) -> String {
+    IngredientFamily(rawValue: item).map { $0.displayName.lowercased() } ?? item
 }
 
 /// "a" · "a and b" · "a, b and c", first letter capitalised.

@@ -56,12 +56,19 @@ public struct DishImageQuery: Codable, Hashable, Sendable {
     public var originalName: String?
     /// Cuisine ("Thai"); part of the cache key and the stock-photo query.
     public var cuisine: String?
+    /// The generic kind of dish in English ("pizza"). A photo must show one.
+    public var kind: String?
+    /// The menu's section heading ("Pizzas"); stands in for `kind` when that is missing.
+    public var section: String?
 
-    public init(id: UUID, name: String, originalName: String? = nil, cuisine: String? = nil) {
+    public init(id: UUID, name: String, originalName: String? = nil, cuisine: String? = nil,
+                kind: String? = nil, section: String? = nil) {
         self.id = id
         self.name = name
         self.originalName = originalName
         self.cuisine = cuisine
+        self.kind = kind
+        self.section = section
     }
 }
 
@@ -92,15 +99,80 @@ public struct DishImageResult: Codable, Hashable, Sendable {
     public var id: UUID
     /// `nil` when every tier missed: the app draws the plate.
     public var image: DishImage?
-    public init(id: UUID, image: DishImage?) {
+    /// No photo because a source was rate-limited or slow, not because none
+    /// exists: worth asking again later.
+    public var retry: Bool
+
+    public init(id: UUID, image: DishImage?, retry: Bool = false) {
         self.id = id
         self.image = image
+        self.retry = retry
+    }
+
+    private enum CodingKeys: String, CodingKey { case id, image, retry }
+
+    public init(from decoder: any Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        id = try c.decode(UUID.self, forKey: .id)
+        image = try c.decodeIfPresent(DishImage.self, forKey: .image)
+        retry = try c.decodeIfPresent(Bool.self, forKey: .retry) ?? false
     }
 }
 
 public struct DishImagesResponse: Codable, Hashable, Sendable {
     public var results: [DishImageResult]
     public init(results: [DishImageResult]) { self.results = results }
+}
+
+// MARK: - Filters from a sentence
+
+/// `POST /v1/filters/interpret`: "only pizzas with mozzarella, no mushrooms"
+/// turned into filters, against what this menu actually has.
+public struct InterpretFiltersRequest: Codable, Hashable, Sendable {
+    public var text: String
+    /// The menu's section headings, exactly as shown.
+    public var sections: [String]
+    /// The standard ingredient names on this menu ("mozzarella", "bell pepper").
+    public var ingredients: [String]
+
+    public init(text: String, sections: [String], ingredients: [String]) {
+        self.text = text
+        self.sections = sections
+        self.ingredients = ingredients
+    }
+}
+
+/// What a sentence asks for. Every field is optional; an empty intent means
+/// the sentence was not a filter (the app then treats it as a search).
+public struct FilterIntent: Codable, Hashable, Sendable {
+    /// Show only these sections (titles from the request).
+    public var onlySections: [String]
+    /// Hide these sections.
+    public var hideSections: [String]
+    /// Standard ingredient names or families the diner wants.
+    public var want: [String]
+    /// Standard ingredient names or families to avoid ("mushroom", "seafood").
+    public var avoid: [String]
+    public var requiredTags: [DietaryTag]
+    public var maxSpice: SpiceLevel?
+    public var maxPrice: Decimal?
+
+    public init(onlySections: [String] = [], hideSections: [String] = [], want: [String] = [],
+                avoid: [String] = [], requiredTags: [DietaryTag] = [], maxSpice: SpiceLevel? = nil,
+                maxPrice: Decimal? = nil) {
+        self.onlySections = onlySections
+        self.hideSections = hideSections
+        self.want = want
+        self.avoid = avoid
+        self.requiredTags = requiredTags
+        self.maxSpice = maxSpice
+        self.maxPrice = maxPrice
+    }
+
+    public var isEmpty: Bool {
+        onlySections.isEmpty && hideSections.isEmpty && want.isEmpty && avoid.isEmpty
+            && requiredTags.isEmpty && maxSpice == nil && maxPrice == nil
+    }
 }
 
 // MARK: - Phrases

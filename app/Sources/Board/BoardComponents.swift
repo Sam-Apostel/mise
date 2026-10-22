@@ -9,11 +9,16 @@ struct DishPhoto: View {
     let dish: Dish
     var plateScale: CGFloat = 0.72
     @Environment(\.colorScheme) private var scheme
+    /// Optional so previews and seeded screens without a model still draw.
+    @Environment(AppModel.self) private var model: AppModel?
 
     var body: some View {
         ZStack {
             Board.tile
-            if let url = dish.imageURL {
+            if let mine = model?.myPhoto(for: dish), let url = model?.url(for: mine) {
+                // The diner's own plate wins over the typical photo.
+                LocalPhoto(url: url) { plate }
+            } else if let url = dish.imageURL {
                 AsyncImage(url: url, transaction: Transaction(animation: .easeOut(duration: 0.25))) { phase in
                     switch phase {
                     case .success(let image):
@@ -38,6 +43,37 @@ struct DishPhoto: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
     }
+}
+
+/// A photo from the device's own storage, decoded once and kept in memory.
+struct LocalPhoto<Placeholder: View>: View {
+    let url: URL
+    @ViewBuilder var placeholder: Placeholder
+    @State private var image: UIImage?
+
+    var body: some View {
+        Group {
+            if let image = image ?? LocalPhotoCache.images[url] {
+                Image(uiImage: image).resizable().scaledToFill()
+            } else {
+                placeholder
+            }
+        }
+        .task(id: url) {
+            if let cached = LocalPhotoCache.images[url] { image = cached; return }
+            let url = url
+            let data = await Task.detached(priority: .userInitiated) { try? Data(contentsOf: url) }.value
+            guard let data, let loaded = UIImage(data: data) else { return }
+            LocalPhotoCache.images[url] = loaded
+            withAnimation(.easeOut(duration: 0.25)) { image = loaded }
+        }
+    }
+}
+
+/// Decoded own photos by file URL; files are never rewritten, so entries stay valid.
+@MainActor
+enum LocalPhotoCache {
+    static var images: [URL: UIImage] = [:]
 }
 
 /// The painted "02 · ฿95" chip in the ground colour, notched into the photo's corner.
@@ -219,13 +255,15 @@ struct CreamChip: View {
     let isOn: Bool
     var onColor: Color = Board.paint
     var showsCheck = false
+    /// Replaces the checkmark when on ("plus" for wanted, "minus" for avoided).
+    var icon = "checkmark"
     let action: () -> Void
 
     var body: some View {
         Button(action: action) {
             HStack(spacing: 8) {
                 if isOn && showsCheck {
-                    Image(systemName: "checkmark").font(.system(size: 13, weight: .bold))
+                    Image(systemName: icon).font(.system(size: 13, weight: .bold))
                 }
                 Text(title).font(.system(size: 15, weight: .semibold))
                 if let detail {

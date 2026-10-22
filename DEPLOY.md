@@ -25,6 +25,9 @@ when you trigger it. One-time setup, then deploy is one tap.
 4. **Add env vars.** railway.com → mise → the service → **Variables**:
    - `ANTHROPIC_API_KEY` = your key _(without it, the server runs the heuristic parser — still healthy)_
    - `ANTHROPIC_MODEL` = `claude-opus-4-8`
+   - `PEXELS_API_KEY` _(optional, free: pexels.com/api)_ and `PIXABAY_API_KEY` _(optional, free:
+     pixabay.com/api/docs)_. Dish photos come from Wikimedia Commons first; these two take over
+     for dishes Commons has no photo of, or while it is rate-limiting the server.
    Then re-run the workflow (step 3) so they take effect.
 5. **Make it public.** Service → **Settings → Networking → Generate Domain**. Copy the URL.
 6. **Tell me the domain.** I'll point the app's Release build at it and verify `/health`.

@@ -39,8 +39,8 @@ targets:
         INFOPLIST_KEY_UILaunchScreen_Generation: YES
         INFOPLIST_KEY_UIApplicationSceneManifest_Generation: YES
         INFOPLIST_KEY_UISupportedInterfaceOrientations: "UIInterfaceOrientationPortrait"
-        INFOPLIST_KEY_NSCameraUsageDescription: "Mise uses the camera to scan menus."
-        INFOPLIST_KEY_NSPhotoLibraryUsageDescription: "Mise reads menu photos you choose from your library."
+        INFOPLIST_KEY_NSCameraUsageDescription: "Mise uses the camera to scan menus and to photograph the dishes you order."
+        INFOPLIST_KEY_NSPhotoLibraryUsageDescription: "Mise reads menu and dish photos you choose from your library."
       # Backend base URL, read by AppConfig.apiBaseURL. Debug talks to a local
       # `make server-run`; Release talks to the Railway deployment.
       configs:
