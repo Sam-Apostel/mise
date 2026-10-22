@@ -1,4 +1,5 @@
 import XCTest
+import UIKit
 import MiseShared
 @testable import Mise
 
@@ -81,5 +82,50 @@ final class AppModelTests: XCTestCase {
         XCTAssertTrue(model.filter.preferredIngredients.isEmpty)
         model.cycle("tomato")
         XCTAssertFalse(model.filter.isActive)
+    }
+
+    func testMyPhotoComesBackOnTheNextVisitOnly() async {
+        let folder = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        defer { try? FileManager.default.removeItem(at: folder) }
+        let model = AppModel(store: LocalStore(directory: folder))
+        let first = ParsedMenu(restaurantName: "Pizzeria Da Michele",
+                               dishes: [Dish(name: "Margherita Pizza", originalName: "MARGHERITA")])
+        model.open(first)
+        let png = UIGraphicsImageRenderer(size: CGSize(width: 4, height: 3)).pngData { context in
+            UIColor.red.setFill()
+            context.fill(CGRect(x: 0, y: 0, width: 4, height: 3))
+        }
+        let saved = await model.saveMyPhoto(png, for: first.dishes[0])
+        XCTAssertTrue(saved)
+        XCTAssertNotNil(model.myPhoto(for: first.dishes[0]))
+
+        // A later scan of the same place, spelled differently: new ids, same photo.
+        let again = ParsedMenu(restaurantName: "PIZZERIA DA MICHÈLE",
+                               dishes: [Dish(name: "Margherita", originalName: "Margherita")])
+        model.open(again)
+        XCTAssertNotNil(model.myPhoto(for: again.dishes[0]))
+
+        let elsewhere = ParsedMenu(restaurantName: "Sorbillo", dishes: [Dish(name: "Margherita", originalName: "Margherita")])
+        model.open(elsewhere)
+        XCTAssertNil(model.myPhoto(for: elsewhere.dishes[0]))
+
+        // Kept across launches.
+        let relaunched = AppModel(store: LocalStore(directory: folder))
+        relaunched.open(again)
+        let photo = relaunched.myPhoto(for: again.dishes[0])
+        XCTAssertNotNil(photo)
+        XCTAssertTrue(FileManager.default.fileExists(atPath: photo.flatMap(relaunched.url(for:))?.path ?? ""))
+
+        relaunched.removeMyPhoto(for: again.dishes[0])
+        XCTAssertTrue(relaunched.myPhotos.isEmpty)
+    }
+
+    func testUnnamedRestaurantPhotosStayWithTheirMenu() {
+        let dish = Dish(name: "Margherita")
+        let menu = ParsedMenu(dishes: [dish])
+        let photo = MyDishPhoto(restaurant: MyDishPhoto.restaurantKey(for: menu), dish: MyDishPhoto.dishKey(for: dish),
+                                menuID: menu.id, file: "x.jpg", takenAt: .now)
+        XCTAssertTrue(photo.matches(dish, in: menu))
+        XCTAssertFalse(photo.matches(Dish(name: "Margherita"), in: ParsedMenu(dishes: [Dish(name: "Margherita")])))
     }
 }
