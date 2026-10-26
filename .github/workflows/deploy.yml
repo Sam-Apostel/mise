@@ -16,6 +16,9 @@ concurrency:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    env:
+      # T-Minus project ingest key. The release-note step below is skipped without it.
+      TMINUS_KEY: ${{ secrets.TMINUS_KEY }}
     steps:
       - uses: actions/checkout@v4
 
@@ -27,3 +30,27 @@ jobs:
           # Project token from Railway → project "mise" → Settings → Tokens.
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
         run: railway up --ci
+
+      - name: Write the release note
+        id: release
+        if: env.TMINUS_KEY != ''
+        env:
+          REASON: ${{ inputs.reason }}
+        run: |
+          {
+            echo "version=server-${GITHUB_SHA::7}"
+            echo "notes<<EOF"
+            if [ -n "$REASON" ]; then printf '%s\n\n' "$REASON"; fi
+            echo "Deployed \`$(git log -1 --format=%s)\`."
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Publish it to T-Minus
+        if: env.TMINUS_KEY != ''
+        uses: sam-apostel/working-on/action@main
+        with:
+          command: release
+          key: ${{ env.TMINUS_KEY }}
+          version: ${{ steps.release.outputs.version }}
+          title: Server deploy
+          notes: ${{ steps.release.outputs.notes }}

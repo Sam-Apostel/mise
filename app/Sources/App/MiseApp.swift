@@ -4,6 +4,10 @@ import SwiftUI
 struct MiseApp: App {
     @State private var model = Seed.makeModel()
 
+    init() {
+        ErrorReporting.start()
+    }
+
     var body: some Scene {
         WindowGroup {
             RootView()

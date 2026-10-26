@@ -19,6 +19,7 @@ build/
 # ==== Secrets / local env ====
 .env
 *.local
+app/Config/Secrets.xcconfig
 
 # ==== Railway ====
 .railway/

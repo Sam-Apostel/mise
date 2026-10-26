@@ -1,0 +1,8 @@
+// Build settings shared by Debug and Release. Secrets go in Secrets.xcconfig next to this file
+// (gitignored, optional). For T-Minus error and crash reporting:
+//
+//   TMINUS_KEY = tm_…
+//   TMINUS_URL = https:/$()/your-hub.example   // only for a self-hosted hub; `$()` keeps `//` from starting a comment
+//
+// Without TMINUS_KEY the app reports nothing.
+#include? "Secrets.xcconfig"

@@ -28,6 +28,9 @@ when you trigger it. One-time setup, then deploy is one tap.
    - `PEXELS_API_KEY` _(optional, free: pexels.com/api)_ and `PIXABAY_API_KEY` _(optional, free:
      pixabay.com/api/docs)_. Dish photos come from Wikimedia Commons first; these two take over
      for dishes Commons has no photo of, or while it is rate-limiting the server.
+   - `TMINUS_KEY` _(optional)_: the T-Minus project ingest key. Server 5xx errors are reported
+     to T-Minus; without it nothing is sent. Add it as a GitHub Actions secret too, and each
+     deploy run posts a release note there.
    Then re-run the workflow (step 3) so they take effect.
 5. **Make it public.** Service → **Settings → Networking → Generate Domain**. Copy the URL.
 6. **Tell me the domain.** I'll point the app's Release build at it and verify `/health`.

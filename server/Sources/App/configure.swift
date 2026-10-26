@@ -27,5 +27,8 @@ public func configure(_ app: Application) async throws {
     app.phraseService = PhraseService(apiKey: app.menuParser.apiKey, model: app.menuParser.model)
     app.filterInterpreter = FilterInterpreter(apiKey: app.menuParser.apiKey, model: app.menuParser.model)
 
+    // Server errors go to T-Minus when TMINUS_KEY is set.
+    TMinusReporting.start(app)
+
     try routes(app)
 }
