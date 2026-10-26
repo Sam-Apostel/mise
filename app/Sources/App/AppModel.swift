@@ -92,6 +92,7 @@ final class AppModel {
             capturedImage = nil
             await enrich()
         } catch {
+            ErrorReporting.capture(error)
             phase = .failed(error.localizedDescription)
         }
     }

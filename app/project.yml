@@ -18,6 +18,10 @@ settings:
 packages:
   MiseShared:
     path: ../Shared
+  # T-Minus error and crash reporting. No version tag yet, so it tracks `main`.
+  TMinusKit:
+    url: https://github.com/sam-apostel/working-on
+    branch: main
 
 targets:
   Mise:
@@ -29,6 +33,11 @@ targets:
     dependencies:
       - package: MiseShared
         product: MiseShared
+      - package: TMinusKit
+    # TMINUS_KEY / TMINUS_URL come from the gitignored Config/Secrets.xcconfig it includes.
+    configFiles:
+      Debug: Config/Mise.xcconfig
+      Release: Config/Mise.xcconfig
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: be.apostel.mise
@@ -54,6 +63,8 @@ targets:
         CFBundleShortVersionString: "$(MARKETING_VERSION)"
         CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
         MiseAPIBaseURL: "$(MISE_API_BASE_URL)"
+        TMINUS_KEY: "$(TMINUS_KEY)"
+        TMINUS_URL: "$(TMINUS_URL)"
         UIAppFonts:
           - MiseBoard-Display.ttf
           - MiseBoard-Heavy.ttf
